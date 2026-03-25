@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Okul Futbol Ligi</title>
+  <meta name="description" content="Okul futbol ligimizin puan tablosu, maç sonuçları ve fikstürü." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-inner container">
+      <div class="brand">
+        <div class="brand-icon">⚽</div>
+        <div>
+          <h1 class="brand-name">Okul Futbol Ligi</h1>
+          <p class="brand-sub" id="seasonLabel">2024–2025 Sezonu</p>
+        </div>
+      </div>
+      <!-- WEATHER WIDGET -->
+      <div class="weather-widget" id="weatherWidget">
+        <div class="weather-now" id="weatherNow"></div>
+        <div class="weather-hours" id="weatherHours"></div>
+      </div>
+      <nav class="nav" id="mainNav">
+        <a class="nav-link active" href="#" data-tab="standings">Puan Tablosu</a>
+        <a class="nav-link" href="#" data-tab="results">Maç Sonuçları</a>
+        <a class="nav-link" href="#" data-tab="fixtures">Fikstür</a>
+        <a class="nav-link" href="#" data-tab="teams">Takımlar</a>
+        <a class="nav-link" href="#" data-tab="admin">Yönetim</a>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Menü">☰</button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main container">
+
+    <!-- HERO STATS (3 cards) -->
+    <section class="hero-stats">
+      <div class="stat-card">
+        <span class="stat-number" id="totalTeams">0</span>
+        <span class="stat-label">Takım</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="totalMatches">0</span>
+        <span class="stat-label">Oynanan Maç</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="leaderName">—</span>
+        <span class="stat-label">Lider Takım</span>
+      </div>
+    </section>
+
+    <!-- ===== STANDINGS TAB ===== -->
+    <section class="tab-section active" id="tab-standings">
+      <div class="section-header">
+        <h2 class="section-title">Puan Tablosu</h2>
+      </div>
+      <div class="table-wrapper">
+        <table class="league-table" id="standingsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Takım</th>
+              <th title="Oynanan Maç">O</th>
+              <th title="Galibiyet">G</th>
+              <th title="Beraberlik">B</th>
+              <th title="Mağlubiyet">M</th>
+              <th title="Attığı Gol">AG</th>
+              <th title="Yediği Gol">YG</th>
+              <th title="Gol Farkı">GF</th>
+              <th title="Puan">P</th>
+            </tr>
+          </thead>
+          <tbody id="standingsBody">
+            <tr><td colspan="10" class="empty-state">Yönetim panelinden takım ekleyin.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="dot gold"></span>Şampiyon Bölgesi</span>
+        <span class="legend-item"><span class="dot green"></span>Play-off</span>
+      </div>
+    </section>
+
+    <!-- ===== RESULTS TAB ===== -->
+    <section class="tab-section" id="tab-results">
+      <div class="section-header">
+        <h2 class="section-title">Maç Sonuçları</h2>
+        <div class="filter-group">
+          <select id="resultFilter" class="filter-select">
+            <option value="all">Tüm Haftalar</option>
+          </select>
+        </div>
+      </div>
+      <div class="matches-list" id="resultsGrid">
+        <div class="empty-state">Henüz maç sonucu eklenmemiş.</div>
+      </div>
+    </section>
+
+    <!-- ===== FIXTURES TAB ===== -->
+    <section class="tab-section" id="tab-fixtures">
+      <div class="section-header">
+        <h2 class="section-title">Fikstür</h2>
+      </div>
+      <div class="matches-list" id="fixturesGrid">
+        <div class="empty-state">Henüz fikstür eklenmemiş.</div>
+      </div>
+    </section>
+
+    <!-- ===== TEAMS TAB ===== -->
+    <section class="tab-section" id="tab-teams">
+      <div class="section-header">
+        <h2 class="section-title">Takımlar & Kadro</h2>
+      </div>
+      <div class="teams-grid" id="teamsGrid">
+        <div class="empty-state">Henüz takım eklenmemiş.</div>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN TAB ===== -->
+    <section class="tab-section" id="tab-admin">
+      <div class="section-header">
+        <h2 class="section-title">Yönetim Paneli</h2>
+        <button class="btn btn-secondary" id="upgradeAdminBtn" style="display:none">🔓 Tam Erişim</button>
+      </div>
+      <div class="admin-grid">
+
+        <!-- ADD TEAM -->
+        <div class="admin-card" data-level="full">
+          <h3 class="admin-card-title">Takım Ekle</h3>
+          <form id="addTeamForm" class="admin-form">
+            <div class="form-group">
+              <label for="teamName">Takım Adı</label>
+              <input type="text" id="teamName" placeholder="örn: Yıldırım FC" required />
+            </div>
+            <div class="form-group">
+              <label for="teamColor">Renk</label>
+              <input type="color" id="teamColor" value="#3b82f6" />
+            </div>
+            <button type="submit" class="btn btn-primary">Takım Ekle</button>
+          </form>
+          <div class="admin-teams-list" id="adminTeamsList"></div>
+        </div>
+
+        <!-- ADD PLAYER -->
+        <div class="admin-card" data-level="full">
+          <h3 class="admin-card-title">Oyuncu Ekle</h3>
+          <form id="addPlayerForm" class="admin-form">
+            <div class="form-group">
+              <label for="playerTeam">Takım</label>
+              <select id="playerTeam" required><option value="">Seçin</option></select>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="flex:0 0 80px">
+                <label for="playerNumber">Numara</label>
+                <input type="number" id="playerNumber" min="1" max="99" placeholder="10" required />
+              </div>
+              <div class="form-group">
+                <label for="playerName">Oyuncu Adı</label>
+                <input type="text" id="playerName" placeholder="Ahmet Yılmaz" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="playerPos">Mevki</label>
+              <select id="playerPos" required>
+                <option value="">Seçin</option>
+                <option value="KK">Kaleci (KK)</option>
+                <option value="STB">Sol Bek (STB)</option>
+                <option value="SB">Sağ Bek (SB)</option>
+                <option value="MS">Merkez Stoper (MS)</option>
+                <option value="STO">Sol Ön Libero (STO)</option>
+                <option value="SO">Sol Orta (SO)</option>
+                <option value="MO">Merkez Orta (MO)</option>
+                <option value="SAO">Sağ Orta (SAO)</option>
+                <option value="AS">Açık Sol (AS)</option>
+                <option value="ASA">Açık Sağ (ASA)</option>
+                <option value="FW">Forvet (FW)</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Oyuncu Ekle</button>
+          </form>
+        </div>
+
+        <!-- ADD RESULT -->
+        <div class="admin-card" data-level="full" style="grid-column: 1 / -1;">
+          <h3 class="admin-card-title">Maç Sonucu + Detaylar</h3>
+          <form id="addResultForm" class="admin-form">
+
+            <!-- Basic info -->
+            <div class="form-row">
+              <div class="form-group" style="flex:0 0 100px">
+                <label for="matchWeek">Hafta</label>
+                <input type="number" id="matchWeek" min="1" value="1" required />
+              </div>
+              <div class="form-group">
+                <label for="matchDate">Tarih</label>
+                <input type="date" id="matchDate" required />
+              </div>
+            </div>
+            <div class="form-row score-row">
+              <div class="form-group">
+                <label for="homeTeam">Ev Sahibi</label>
+                <select id="homeTeam" required><option value="">Seçin</option></select>
+              </div>
+              <div class="form-group score-inputs">
+                <label>Skor</label>
+                <div class="score-pair">
+                  <input type="number" id="homeScore" min="0" value="0" required />
+                  <span class="sep">:</span>
+                  <input type="number" id="awayScore" min="0" value="0" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="awayTeam">Deplasman</label>
+                <select id="awayTeam" required><option value="">Seçin</option></select>
+              </div>
+            </div>
+
+            <!-- Lineups -->
+            <div class="lineups-section">
+              <div class="lineup-col">
+                <h4 class="lineup-title" id="homeLineupTitle">Ev Sahibi İlk 11</h4>
+                <div id="homeLineupSelect" class="lineup-grid"></div>
+              </div>
+              <div class="lineup-col">
+                <h4 class="lineup-title" id="awayLineupTitle">Deplasman İlk 11</h4>
+                <div id="awayLineupSelect" class="lineup-grid"></div>
+              </div>
+            </div>
+
+            <!-- Events -->
+            <div class="events-section">
+              <h4 class="events-title">Maç Olayları</h4>
+              <div id="eventsList" class="events-list"></div>
+              <div class="events-add-row">
+                <select id="eventType" class="filter-select">
+                  <option value="goal">⚽ Gol</option>
+                  <option value="yellow">🟨 Sarı Kart</option>
+                  <option value="red">🟥 Kırmızı Kart</option>
+                </select>
+                <input type="number" id="eventMinute" placeholder="Dk." min="1" max="120" class="min-input" />
+                <select id="eventTeamSide" class="filter-select">
+                  <option value="home">Ev</option>
+                  <option value="away">Dep.</option>
+                </select>
+                <select id="eventPlayer" class="filter-select"><option value="">Oyuncu</option></select>
+                <div id="assistRow" class="assist-row">
+                  <select id="eventAssist" class="filter-select"><option value="">Asist (opsiyonel)</option></select>
+                </div>
+                <button type="button" class="btn btn-secondary" id="addEventBtn">+ Ekle</button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top:8px">Maç Sonucunu Kaydet</button>
+          </form>
+        </div>
+
+        <!-- ADD FIXTURE -->
+        <div class="admin-card">
+          <h3 class="admin-card-title">Fikstür Ekle</h3>
+          <form id="addFixtureForm" class="admin-form">
+            <div class="form-group">
+              <label for="fixtureWeek">Hafta</label>
+              <input type="number" id="fixtureWeek" min="1" value="1" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fixtureHome">Ev Sahibi</label>
+                <select id="fixtureHome" required><option value="">Seçin</option></select>
+              </div>
+              <div class="form-group">
+                <label for="fixtureAway">Deplasman</label>
+                <select id="fixtureAway" required><option value="">Seçin</option></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fixtureDate">Tarih</label>
+                <input type="date" id="fixtureDate" required />
+              </div>
+              <div class="form-group">
+                <label for="fixtureTime">Saat</label>
+                <input type="time" id="fixtureTime" value="14:00" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fixtureVenue">Saha</label>
+              <input type="text" id="fixtureVenue" placeholder="Okul Sahası A" />
+            </div>
+            <button type="submit" class="btn btn-primary">Fikstür Ekle</button>
+          </form>
+        </div>
+
+        <!-- DANGER ZONE -->
+        <div class="admin-card danger-zone" data-level="full">
+          <h3 class="admin-card-title">Tehlikeli Bölge</h3>
+          <p class="danger-desc">Bu işlemler geri alınamaz.</p>
+          <button class="btn btn-danger" id="clearResultsBtn">Tüm Sonuçları Sil</button>
+          <button class="btn btn-danger" id="clearAllBtn">Her Şeyi Sıfırla</button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MATCH DETAIL MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="matchModal">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN PASSWORD GATE -->
+  <div class="gate-overlay" id="gateOverlay">
+    <div class="gate-box">
+      <div class="gate-icon">🔐</div>
+      <div class="gate-title">Yönetim Paneli</div>
+      <div class="gate-desc">Bu alana erişmek için şifre gereklidir.</div>
+      <input type="password" class="gate-input" id="gateInput" placeholder="Şifre" maxlength="32" />
+      <button class="btn btn-primary" id="gateSubmit">Giriş Yap</button>
+      <p class="gate-hint">Şifreyi öğrenmek için lüg yöneticisine başvurun.</p>
+      <br/>
+      <button class="gate-cancel" id="gateCancel">İptal</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <span class="loading-ball">⚽</span>
+    <p>Veriler yükleniyor...</p>
+  </div>
+
+  <!-- Firebase SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
