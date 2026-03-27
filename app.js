@@ -155,7 +155,7 @@ function renderStandings() {
     if (rank === 1) rankHtml = `<span class="rank-badge rank-1">1</span>`;
     else if (rank === 2) rankHtml = `<span class="rank-badge rank-2">2</span>`;
     else if (rank === 3) rankHtml = `<span class="rank-badge rank-3">3</span>`;
-    const zoneClass = rank === 1 ? 'zone-gold' : rank <= 3 && total > 3 ? 'zone-green' : '';
+    const zoneClass = rank === 1 ? 'zone-gold' : '';
     return `
     <tr class="${zoneClass}">
       <td>${rankHtml}</td>
