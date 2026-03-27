@@ -337,6 +337,173 @@ function populateWeekFilter() {
     weeks.map(w => `<option value="${w}">Hafta ${w}</option>`).join('');
 }
 
+// ── STATS ENGINE ──────────────────────────
+function computePlayerStats() {
+  const results = DB.results;
+  const players = DB.players;
+  const teams   = DB.teams;
+  const goalMap   = {};  // playerId → count
+  const assistMap = {};  // playerId → count
+
+  results.forEach(r => {
+    (r.events || []).forEach(ev => {
+      if (ev.type === 'goal') {
+        goalMap[ev.playerId] = (goalMap[ev.playerId] || 0) + 1;
+        if (ev.assistId) {
+          assistMap[ev.assistId] = (assistMap[ev.assistId] || 0) + 1;
+        }
+      }
+    });
+  });
+
+  const findPlayer = id => players.find(p => p.id === id);
+  const findTeam   = id => teams.find(t => t.id === id);
+
+  const scorers = Object.entries(goalMap)
+    .map(([pid, count]) => ({ player: findPlayer(pid), count }))
+    .filter(x => x.player)
+    .sort((a, b) => b.count - a.count);
+
+  const assisters = Object.entries(assistMap)
+    .map(([pid, count]) => ({ player: findPlayer(pid), count }))
+    .filter(x => x.player)
+    .sort((a, b) => b.count - a.count);
+
+  // Team stats
+  const teamGoals   = {};  // teamId → { scored, conceded, scorers: { playerId: count } }
+  const teamAssists = {};  // teamId → { total, assisters: { playerId: count } }
+
+  teams.forEach(t => {
+    teamGoals[t.id]   = { scored: 0, conceded: 0, scorers: {} };
+    teamAssists[t.id] = { total: 0, assisters: {} };
+  });
+
+  results.forEach(r => {
+    if (teamGoals[r.homeId]) {
+      teamGoals[r.homeId].scored   += r.homeScore;
+      teamGoals[r.homeId].conceded += r.awayScore;
+    }
+    if (teamGoals[r.awayId]) {
+      teamGoals[r.awayId].scored   += r.awayScore;
+      teamGoals[r.awayId].conceded += r.homeScore;
+    }
+
+    (r.events || []).forEach(ev => {
+      const teamId = ev.teamSide === 'home' ? r.homeId : r.awayId;
+      if (ev.type === 'goal') {
+        if (teamGoals[teamId]?.scorers) {
+          teamGoals[teamId].scorers[ev.playerId] = (teamGoals[teamId].scorers[ev.playerId] || 0) + 1;
+        }
+        if (ev.assistId && teamAssists[teamId]?.assisters) {
+          teamAssists[teamId].total++;
+          teamAssists[teamId].assisters[ev.assistId] = (teamAssists[teamId].assisters[ev.assistId] || 0) + 1;
+        }
+      }
+    });
+  });
+
+  return { scorers, assisters, teamGoals, teamAssists, findPlayer, findTeam };
+}
+
+function renderStats() {
+  const { scorers, assisters, teamGoals, teamAssists, findPlayer, findTeam } = computePlayerStats();
+  const teams   = DB.teams;
+
+  // ── Gol Krallığı ──
+  const scorersEl = document.getElementById('topScorers');
+  if (!scorers.length) {
+    scorersEl.innerHTML = '<div class="empty-state">Henüz gol verisi yok.</div>';
+  } else {
+    scorersEl.innerHTML = scorers.slice(0, 15).map((s, i) => {
+      const team = findTeam(s.player.teamId);
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span class="stat-rank">${i + 1}</span>`;
+      return `
+      <div class="stat-row ${i < 3 ? 'stat-top' : ''}">
+        <span class="stat-medal">${medal}</span>
+        <span class="stat-player">${s.player.name}</span>
+        <span class="stat-team-dot" style="background:${team?.color || '#666'}"></span>
+        <span class="stat-team-name">${team?.name || '?'}</span>
+        <span class="stat-count">${s.count}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Asist Krallığı ──
+  const assistsEl = document.getElementById('topAssists');
+  if (!assisters.length) {
+    assistsEl.innerHTML = '<div class="empty-state">Henüz asist verisi yok.</div>';
+  } else {
+    assistsEl.innerHTML = assisters.slice(0, 15).map((a, i) => {
+      const team = findTeam(a.player.teamId);
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span class="stat-rank">${i + 1}</span>`;
+      return `
+      <div class="stat-row ${i < 3 ? 'stat-top' : ''}">
+        <span class="stat-medal">${medal}</span>
+        <span class="stat-player">${a.player.name}</span>
+        <span class="stat-team-dot" style="background:${team?.color || '#666'}"></span>
+        <span class="stat-team-name">${team?.name || '?'}</span>
+        <span class="stat-count">${a.count}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Takım Gol Analizi ──
+  const goalAnalysisEl = document.getElementById('teamGoalAnalysis');
+  const teamGoalRows = teams.map(t => {
+    const tg = teamGoals[t.id] || { scored: 0, conceded: 0, scorers: {} };
+    const topScorer = Object.entries(tg.scorers).sort((a,b) => b[1] - a[1])[0];
+    const topScorerPlayer = topScorer ? findPlayer(topScorer[0]) : null;
+    const avg = DB.results.filter(r => r.homeId === t.id || r.awayId === t.id).length;
+    const avgGoal = avg ? (tg.scored / avg).toFixed(1) : '0.0';
+    return { team: t, scored: tg.scored, conceded: tg.conceded, topScorerPlayer, topScorerGoals: topScorer?.[1] || 0, avgGoal };
+  }).sort((a, b) => b.scored - a.scored);
+
+  if (!teamGoalRows.some(r => r.scored > 0)) {
+    goalAnalysisEl.innerHTML = '<div class="empty-state">Henüz gol verisi yok.</div>';
+  } else {
+    goalAnalysisEl.innerHTML = `
+    <table class="stats-table">
+      <thead><tr>
+        <th>Takım</th><th>AG</th><th>YG</th><th>Ort.</th><th>En Golcü</th>
+      </tr></thead>
+      <tbody>${teamGoalRows.map(r => `
+        <tr>
+          <td><span class="team-badge"><span class="team-dot" style="background:${r.team.color}"></span>${r.team.name}</span></td>
+          <td class="points-cell">${r.scored}</td>
+          <td>${r.conceded}</td>
+          <td>${r.avgGoal}</td>
+          <td>${r.topScorerPlayer ? `${r.topScorerPlayer.name} (${r.topScorerGoals})` : '—'}</td>
+        </tr>`).join('')}</tbody>
+    </table>`;
+  }
+
+  // ── Takım Asist Analizi ──
+  const assistAnalysisEl = document.getElementById('teamAssistAnalysis');
+  const teamAssistRows = teams.map(t => {
+    const ta = teamAssists[t.id] || { total: 0, assisters: {} };
+    const topAssister = Object.entries(ta.assisters).sort((a,b) => b[1] - a[1])[0];
+    const topAssistPlayer = topAssister ? findPlayer(topAssister[0]) : null;
+    return { team: t, total: ta.total, topAssistPlayer, topAssistCount: topAssister?.[1] || 0 };
+  }).sort((a, b) => b.total - a.total);
+
+  if (!teamAssistRows.some(r => r.total > 0)) {
+    assistAnalysisEl.innerHTML = '<div class="empty-state">Henüz asist verisi yok.</div>';
+  } else {
+    assistAnalysisEl.innerHTML = `
+    <table class="stats-table">
+      <thead><tr>
+        <th>Takım</th><th>Toplam Asist</th><th>En Çok Asist</th>
+      </tr></thead>
+      <tbody>${teamAssistRows.map(r => `
+        <tr>
+          <td><span class="team-badge"><span class="team-dot" style="background:${r.team.color}"></span>${r.team.name}</span></td>
+          <td class="points-cell">${r.total}</td>
+          <td>${r.topAssistPlayer ? `${r.topAssistPlayer.name} (${r.topAssistCount})` : '—'}</td>
+        </tr>`).join('')}</tbody>
+    </table>`;
+  }
+}
+
 // ── FULL RENDER ───────────────────────────
 function renderAll() {
   renderStandings();
@@ -345,6 +512,7 @@ function renderAll() {
   renderFixtures();
   renderTeamsTab();
   renderHeroStats();
+  renderStats();
   populateTeamSelects();
   renderAdminTeamsList();
   populateWeekFilter();

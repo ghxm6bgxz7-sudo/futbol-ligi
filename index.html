@@ -19,7 +19,7 @@
         <div class="brand-icon">⚽</div>
         <div>
           <h1 class="brand-name">Okul Futbol Ligi</h1>
-          <p class="brand-sub" id="seasonLabel">2024–2025 Sezonu</p>
+          <p class="brand-sub" id="seasonLabel">2025–2026 Sezonu</p>
         </div>
       </div>
       <!-- WEATHER WIDGET -->
@@ -32,6 +32,7 @@
         <a class="nav-link" href="#" data-tab="results">Maç Sonuçları</a>
         <a class="nav-link" href="#" data-tab="fixtures">Fikstür</a>
         <a class="nav-link" href="#" data-tab="teams">Takımlar</a>
+        <a class="nav-link" href="#" data-tab="stats">İstatistikler</a>
         <a class="nav-link" href="#" data-tab="admin">Yönetim</a>
       </nav>
       <button class="hamburger" id="hamburger" aria-label="Menü">☰</button>
@@ -121,6 +122,43 @@
       </div>
       <div class="teams-grid" id="teamsGrid">
         <div class="empty-state">Henüz takım eklenmemiş.</div>
+      </div>
+    </section>
+
+    <!-- ===== STATS TAB ===== -->
+    <section class="tab-section" id="tab-stats">
+      <div class="section-header">
+        <h2 class="section-title">İstatistikler</h2>
+      </div>
+      <div class="stats-grid">
+        <!-- Gol Krallığı -->
+        <div class="stats-card">
+          <h3 class="stats-card-title">⚽ Gol Krallığı</h3>
+          <div class="stats-list" id="topScorers">
+            <div class="empty-state">Henüz veri yok.</div>
+          </div>
+        </div>
+        <!-- Asist Krallığı -->
+        <div class="stats-card">
+          <h3 class="stats-card-title">🎯 Asist Krallığı</h3>
+          <div class="stats-list" id="topAssists">
+            <div class="empty-state">Henüz veri yok.</div>
+          </div>
+        </div>
+        <!-- Takım Gol Analizi -->
+        <div class="stats-card stats-card-wide">
+          <h3 class="stats-card-title">📊 Takım Gol Analizi</h3>
+          <div class="stats-table-wrap" id="teamGoalAnalysis">
+            <div class="empty-state">Henüz veri yok.</div>
+          </div>
+        </div>
+        <!-- Takım Asist Analizi -->
+        <div class="stats-card stats-card-wide">
+          <h3 class="stats-card-title">🤝 Takım Asist Analizi</h3>
+          <div class="stats-table-wrap" id="teamAssistAnalysis">
+            <div class="empty-state">Henüz veri yok.</div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -327,7 +365,7 @@
       <div class="gate-desc">Bu alana erişmek için şifre gereklidir.</div>
       <input type="password" class="gate-input" id="gateInput" placeholder="Şifre" maxlength="32" />
       <button class="btn btn-primary" id="gateSubmit">Giriş Yap</button>
-      <p class="gate-hint">Şifreyi öğrenmek için lüg yöneticisine başvurun.</p>
+      <p class="gate-hint">Şifreyi öğrenmek için lig yöneticisine başvurun.</p>
       <br/>
       <button class="gate-cancel" id="gateCancel">İptal</button>
     </div>
