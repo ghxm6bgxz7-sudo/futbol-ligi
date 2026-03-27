@@ -276,7 +276,7 @@ function renderTeamsTab() {
             <div class="player-num">${p.number}</div>
             <div class="player-name">${p.name}</div>
             <div class="player-pos">${p.position}</div>
-            <button class="btn-icon" onclick="event.stopPropagation();deletePlayer('${p.id}')" title="Sil">✕</button>
+            ${adminUnlocked ? `<button class="btn-icon" onclick="event.stopPropagation();deletePlayer('${p.id}')" title="Sil">✕</button>` : ''}
           </div>`).join('')
       : `<div style="padding:14px 18px;font-size:.82rem;color:var(--text-muted)">Henüz oyuncu eklenmemiş.</div>`;
 
