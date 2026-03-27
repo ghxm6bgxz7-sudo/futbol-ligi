@@ -992,6 +992,145 @@ function initForms() {
       'Tüm takımlar, oyuncular ve maçlar silinecek. Bu işlem geri alınamaz!'
     );
   });
+
+  // ── KURA ÇEKİMİ (Draw) ─────────────────
+  let drawnPairs = [];
+
+  document.getElementById('startDrawBtn').addEventListener('click', () => {
+    const teams = [...DB.teams];
+    if (teams.length < 2) { showToast('Kura çekmek için en az 2 takım gerekli!'); return; }
+    drawnPairs = [];
+    startDraw(teams);
+  });
+
+  document.getElementById('resetDrawBtn').addEventListener('click', () => {
+    const teams = [...DB.teams];
+    if (teams.length < 2) { showToast('Kura çekmek için en az 2 takım gerekli!'); return; }
+    drawnPairs = [];
+    startDraw(teams);
+  });
+
+  document.getElementById('saveDrawBtn').addEventListener('click', () => {
+    if (!drawnPairs.length) { showToast('Önce kura çekin!'); return; }
+    const week  = parseInt(document.getElementById('drawWeek').value) || 1;
+    const date  = document.getElementById('drawDate').value || '';
+    const time  = document.getElementById('drawTime').value || '14:00';
+    const fixtures = DB.fixtures;
+    drawnPairs.forEach(pair => {
+      if (!pair.bye) {
+        fixtures.push({
+          id: Date.now().toString() + Math.random().toString(36).slice(2,6),
+          homeId: pair.home.id,
+          awayId: pair.away.id,
+          week, date, time, venue: ''
+        });
+      }
+    });
+    DB.saveFixtures(fixtures);
+    drawnPairs = [];
+    document.getElementById('drawPool').innerHTML = '';
+    document.getElementById('drawResults').innerHTML = '';
+    document.getElementById('drawActions').style.display = 'none';
+    renderAll();
+    showToast('✅ Kura sonuçları fikstüre eklendi!');
+  });
+
+  function startDraw(teams) {
+    const poolEl    = document.getElementById('drawPool');
+    const resultsEl = document.getElementById('drawResults');
+    const actionsEl = document.getElementById('drawActions');
+    const drawBtn   = document.getElementById('startDrawBtn');
+
+    resultsEl.innerHTML = '';
+    actionsEl.style.display = 'none';
+    drawBtn.disabled = true;
+
+    // Shuffle teams
+    const shuffled = [...teams];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Render pool balls
+    poolEl.innerHTML = shuffled.map(t =>
+      `<div class="draw-ball" data-team-id="${t.id}">
+        <span class="draw-ball-dot" style="background:${t.color}"></span>
+        ${t.name}
+      </div>`
+    ).join('');
+
+    // Start shuffling animation
+    setTimeout(() => {
+      poolEl.querySelectorAll('.draw-ball').forEach((ball, i) => {
+        ball.style.animationDelay = `${i * 0.05}s`;
+        ball.classList.add('shuffling');
+      });
+    }, 200);
+
+    // Create pairs
+    const pairs = [];
+    for (let i = 0; i < shuffled.length; i += 2) {
+      if (i + 1 < shuffled.length) {
+        pairs.push({ home: shuffled[i], away: shuffled[i + 1], bye: false });
+      } else {
+        pairs.push({ home: shuffled[i], away: null, bye: true });
+      }
+    }
+
+    // Animate pair reveals
+    const revealDelay = 1200; // ms between each pair
+    const startDelay  = 1500; // initial shuffle time
+
+    pairs.forEach((pair, idx) => {
+      setTimeout(() => {
+        // Remove balls from pool
+        const ball1 = poolEl.querySelector(`[data-team-id="${pair.home.id}"]`);
+        if (ball1) { ball1.classList.remove('shuffling'); ball1.classList.add('picked'); }
+        if (!pair.bye) {
+          const ball2 = poolEl.querySelector(`[data-team-id="${pair.away.id}"]`);
+          if (ball2) { ball2.classList.remove('shuffling'); ball2.classList.add('picked'); }
+        }
+
+        // Append match pair
+        const pairEl = document.createElement('div');
+        pairEl.className = 'draw-match-pair';
+        pairEl.style.animationDelay = '0s';
+        if (pair.bye) {
+          pairEl.innerHTML = `
+            <div class="draw-team">
+              <span class="draw-team-dot" style="background:${pair.home.color}"></span>
+              ${pair.home.name}
+            </div>
+            <span class="draw-vs" style="background:var(--text-muted)">BAY</span>
+            <div class="draw-bye">Bu hafta maçı yok</div>`;
+        } else {
+          pairEl.innerHTML = `
+            <div class="draw-team">
+              <span class="draw-team-dot" style="background:${pair.home.color}"></span>
+              ${pair.home.name}
+            </div>
+            <span class="draw-vs">VS</span>
+            <div class="draw-team away">
+              ${pair.away.name}
+              <span class="draw-team-dot" style="background:${pair.away.color}"></span>
+            </div>`;
+        }
+        resultsEl.appendChild(pairEl);
+        drawnPairs.push(pair);
+
+        // If last pair, show actions
+        if (idx === pairs.length - 1) {
+          setTimeout(() => {
+            // Stop remaining shuffles
+            poolEl.querySelectorAll('.draw-ball.shuffling').forEach(b => b.classList.remove('shuffling'));
+            actionsEl.style.display = 'flex';
+            drawBtn.disabled = false;
+          }, 400);
+        }
+      }, startDelay + idx * revealDelay);
+    });
+  }
 }
 
 // ── MODAL EVENTS ──────────────────────────

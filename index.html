@@ -332,6 +332,34 @@
           </form>
         </div>
 
+        <!-- KURA ÇEKİMİ -->
+        <div class="admin-card" data-level="full" style="grid-column: 1 / -1;">
+          <h3 class="admin-card-title">🎲 Kura Çekimi</h3>
+          <div class="draw-section">
+            <div class="draw-controls">
+              <div class="form-group" style="flex:0 0 120px">
+                <label for="drawWeek">Hafta</label>
+                <input type="number" id="drawWeek" min="1" value="1" class="draw-input" />
+              </div>
+              <div class="form-group" style="flex:0 0 160px">
+                <label for="drawDate">Tarih</label>
+                <input type="date" id="drawDate" class="draw-input" />
+              </div>
+              <div class="form-group" style="flex:0 0 100px">
+                <label for="drawTime">Saat</label>
+                <input type="time" id="drawTime" value="14:00" class="draw-input" />
+              </div>
+              <button class="btn btn-draw" id="startDrawBtn" type="button">🎲 Kura Çek</button>
+            </div>
+            <div class="draw-pool" id="drawPool"></div>
+            <div class="draw-results" id="drawResults"></div>
+            <div class="draw-actions" id="drawActions" style="display:none">
+              <button class="btn btn-primary" id="saveDrawBtn" type="button">💾 Fikstür Olarak Kaydet</button>
+              <button class="btn btn-secondary" id="resetDrawBtn" type="button">🔄 Tekrar Çek</button>
+            </div>
+          </div>
+        </div>
+
         <!-- DANGER ZONE -->
         <div class="admin-card danger-zone" data-level="full">
           <h3 class="admin-card-title">Tehlikeli Bölge</h3>
