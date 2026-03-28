@@ -342,8 +342,10 @@ function computePlayerStats() {
   const results = DB.results;
   const players = DB.players;
   const teams   = DB.teams;
-  const goalMap   = {};  // playerId → count
-  const assistMap = {};  // playerId → count
+  const goalMap    = {};  // playerId → count
+  const assistMap  = {};  // playerId → count
+  const yellowMap  = {};  // playerId → count
+  const redMap     = {};  // playerId → count
 
   results.forEach(r => {
     (r.events || []).forEach(ev => {
@@ -352,6 +354,10 @@ function computePlayerStats() {
         if (ev.assistId) {
           assistMap[ev.assistId] = (assistMap[ev.assistId] || 0) + 1;
         }
+      } else if (ev.type === 'yellow') {
+        yellowMap[ev.playerId] = (yellowMap[ev.playerId] || 0) + 1;
+      } else if (ev.type === 'red') {
+        redMap[ev.playerId] = (redMap[ev.playerId] || 0) + 1;
       }
     });
   });
@@ -369,13 +375,25 @@ function computePlayerStats() {
     .filter(x => x.player)
     .sort((a, b) => b.count - a.count);
 
+  const yellowCards = Object.entries(yellowMap)
+    .map(([pid, count]) => ({ player: findPlayer(pid), count }))
+    .filter(x => x.player)
+    .sort((a, b) => b.count - a.count);
+
+  const redCards = Object.entries(redMap)
+    .map(([pid, count]) => ({ player: findPlayer(pid), count }))
+    .filter(x => x.player)
+    .sort((a, b) => b.count - a.count);
+
   // Team stats
   const teamGoals   = {};  // teamId → { scored, conceded, scorers: { playerId: count } }
   const teamAssists = {};  // teamId → { total, assisters: { playerId: count } }
+  const teamCards   = {};  // teamId → { yellow, red }
 
   teams.forEach(t => {
     teamGoals[t.id]   = { scored: 0, conceded: 0, scorers: {} };
     teamAssists[t.id] = { total: 0, assisters: {} };
+    teamCards[t.id]   = { yellow: 0, red: 0 };
   });
 
   results.forEach(r => {
@@ -398,15 +416,19 @@ function computePlayerStats() {
           teamAssists[teamId].total++;
           teamAssists[teamId].assisters[ev.assistId] = (teamAssists[teamId].assisters[ev.assistId] || 0) + 1;
         }
+      } else if (ev.type === 'yellow' && teamCards[teamId]) {
+        teamCards[teamId].yellow++;
+      } else if (ev.type === 'red' && teamCards[teamId]) {
+        teamCards[teamId].red++;
       }
     });
   });
 
-  return { scorers, assisters, teamGoals, teamAssists, findPlayer, findTeam };
+  return { scorers, assisters, yellowCards, redCards, teamGoals, teamAssists, teamCards, findPlayer, findTeam };
 }
 
 function renderStats() {
-  const { scorers, assisters, teamGoals, teamAssists, findPlayer, findTeam } = computePlayerStats();
+  const { scorers, assisters, yellowCards, redCards, teamGoals, teamAssists, teamCards, findPlayer, findTeam } = computePlayerStats();
   const teams   = DB.teams;
 
   // ── Gol Krallığı ──
@@ -502,7 +524,120 @@ function renderStats() {
         </tr>`).join('')}</tbody>
     </table>`;
   }
+
+  // ── Sarı Kart Sıralaması ──
+  const yellowEl = document.getElementById('topYellowCards');
+  if (!yellowCards.length) {
+    yellowEl.innerHTML = '<div class="empty-state">Henüz sarı kart verisi yok.</div>';
+  } else {
+    yellowEl.innerHTML = yellowCards.slice(0, 15).map((c, i) => {
+      const team = findTeam(c.player.teamId);
+      const medal = i === 0 ? '🟨' : `<span class="stat-rank">${i + 1}</span>`;
+      return `
+      <div class="stat-row ${i === 0 ? 'stat-top-yellow' : ''}">
+        <span class="stat-medal">${medal}</span>
+        <span class="stat-player">${c.player.name}</span>
+        <span class="stat-team-dot" style="background:${team?.color || '#666'}"></span>
+        <span class="stat-team-name">${team?.name || '?'}</span>
+        <span class="stat-count" style="color:var(--yellow)">${c.count}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Kırmızı Kart Sıralaması ──
+  const redEl = document.getElementById('topRedCards');
+  if (!redCards.length) {
+    redEl.innerHTML = '<div class="empty-state">Henüz kırmızı kart verisi yok.</div>';
+  } else {
+    redEl.innerHTML = redCards.slice(0, 15).map((c, i) => {
+      const team = findTeam(c.player.teamId);
+      const medal = i === 0 ? '🟥' : `<span class="stat-rank">${i + 1}</span>`;
+      return `
+      <div class="stat-row ${i === 0 ? 'stat-top-red' : ''}">
+        <span class="stat-medal">${medal}</span>
+        <span class="stat-player">${c.player.name}</span>
+        <span class="stat-team-dot" style="background:${team?.color || '#666'}"></span>
+        <span class="stat-team-name">${team?.name || '?'}</span>
+        <span class="stat-count" style="color:var(--red)">${c.count}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Takım Kart Analizi ──
+  const cardAnalysisEl = document.getElementById('teamCardAnalysis');
+  const teamCardRows = teams.map(t => {
+    const tc = teamCards[t.id] || { yellow: 0, red: 0 };
+    return { team: t, yellow: tc.yellow, red: tc.red, total: tc.yellow + tc.red };
+  }).sort((a, b) => b.total - a.total);
+
+  if (!teamCardRows.some(r => r.total > 0)) {
+    cardAnalysisEl.innerHTML = '<div class="empty-state">Henüz kart verisi yok.</div>';
+  } else {
+    cardAnalysisEl.innerHTML = `
+    <table class="stats-table">
+      <thead><tr>
+        <th>Takım</th><th>🟨 Sarı</th><th>🟥 Kırmızı</th><th>Toplam</th>
+      </tr></thead>
+      <tbody>${teamCardRows.map(r => `
+        <tr>
+          <td><span class="team-badge"><span class="team-dot" style="background:${r.team.color}"></span>${r.team.name}</span></td>
+          <td style="color:var(--yellow);font-weight:700">${r.yellow}</td>
+          <td style="color:var(--red);font-weight:700">${r.red}</td>
+          <td class="points-cell">${r.total}</td>
+        </tr>`).join('')}</tbody>
+    </table>`;
+  }
 }
+
+// ── FIXTURE MANAGEMENT ────────────────────
+function renderFixtureMgmt() {
+  const list     = document.getElementById('fixtureMgmtList');
+  if (!list) return;
+  const teams    = DB.teams;
+  const fixtures = [...DB.fixtures].sort((a,b) => (a.week - b.week) || a.date.localeCompare(b.date));
+  if (!fixtures.length) { list.innerHTML = '<div class="empty-state">Henüz fikstür eklenmemiş.</div>'; return; }
+
+  const findTeam = id => teams.find(t => t.id === id) || { name: '?', color: '#666' };
+  list.innerHTML = fixtures.map(f => {
+    const h = findTeam(f.homeId), a = findTeam(f.awayId);
+    const dateStr = f.date ? new Date(f.date + 'T00:00:00').toLocaleDateString('tr-TR', { day:'2-digit', month:'short' }) : '—';
+    return `
+    <div class="fixture-mgmt-item" data-fid="${f.id}">
+      <div class="fmgmt-info">
+        <span class="fmgmt-week">H${f.week}</span>
+        <span class="fmgmt-teams">
+          <span class="team-dot" style="background:${h.color}"></span>${h.name}
+          <span class="fmgmt-vs">vs</span>
+          <span class="team-dot" style="background:${a.color}"></span>${a.name}
+        </span>
+        <span class="fmgmt-date">${dateStr} · ${f.time || '—'}</span>
+      </div>
+      <div class="fmgmt-actions">
+        <input type="date" class="fmgmt-date-input" value="${f.date || ''}" onchange="updateFixtureDate('${f.id}', this.value)" title="Tarih değiştir" />
+        <input type="time" class="fmgmt-time-input" value="${f.time || '14:00'}" onchange="updateFixtureTime('${f.id}', this.value)" title="Saat değiştir" />
+        <button class="btn-icon" onclick="deleteFixture('${f.id}')" title="Fikstürü Sil">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.updateFixtureDate = function(fid, newDate) {
+  const fixtures = DB.fixtures;
+  const f = fixtures.find(x => x.id === fid);
+  if (f) { f.date = newDate; DB.saveFixtures(fixtures); renderAll(); showToast('📅 Tarih güncellendi.'); }
+};
+
+window.updateFixtureTime = function(fid, newTime) {
+  const fixtures = DB.fixtures;
+  const f = fixtures.find(x => x.id === fid);
+  if (f) { f.time = newTime; DB.saveFixtures(fixtures); renderAll(); showToast('🕐 Saat güncellendi.'); }
+};
+
+window.deleteFixture = function(fid) {
+  if (!confirm('Bu fikstürü silmek istediğinizden emin misiniz?')) return;
+  DB.saveFixtures(DB.fixtures.filter(f => f.id !== fid));
+  renderAll(); showToast('Fikstür silindi.');
+};
 
 // ── FULL RENDER ───────────────────────────
 function renderAll() {
@@ -516,6 +651,7 @@ function renderAll() {
   populateTeamSelects();
   renderAdminTeamsList();
   populateWeekFilter();
+  renderFixtureMgmt();
 }
 
 // ── ADMIN PASSWORD GATE ───────────────────
