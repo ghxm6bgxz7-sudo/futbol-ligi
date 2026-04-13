@@ -1,0 +1,867 @@
+{
+  "fl_fixtures": {
+    "1774701831604": {
+      "awayId": "t8",
+      "date": "2026-04-13",
+      "homeId": "t12",
+      "id": "1774701831604",
+      "time": "12:15",
+      "venue": "",
+      "week": 1
+    },
+    "1774701852174": {
+      "awayId": "t6",
+      "date": "2026-04-14",
+      "homeId": "t5",
+      "id": "1774701852174",
+      "time": "12:15",
+      "venue": "",
+      "week": 1
+    },
+    "1774701872562": {
+      "awayId": "t1",
+      "date": "2026-04-15",
+      "homeId": "t2",
+      "id": "1774701872562",
+      "time": "12:15",
+      "venue": "",
+      "week": 1
+    },
+    "1774701891298": {
+      "awayId": "t4",
+      "date": "2026-04-16",
+      "homeId": "t10",
+      "id": "1774701891298",
+      "time": "12:15",
+      "venue": "",
+      "week": 1
+    },
+    "1774701933421": {
+      "awayId": "t4",
+      "date": "2026-04-20",
+      "homeId": "t8",
+      "id": "1774701933421",
+      "time": "12:15",
+      "venue": "",
+      "week": 2
+    },
+    "1774701954852": {
+      "awayId": "t10",
+      "date": "2026-04-21",
+      "homeId": "t1",
+      "id": "1774701954852",
+      "time": "12:15",
+      "venue": "",
+      "week": 2
+    },
+    "1774701973000": {
+      "awayId": "t7",
+      "date": "2026-04-22",
+      "homeId": "t6",
+      "id": "1774701973000",
+      "time": "12:15",
+      "venue": "",
+      "week": 2
+    },
+    "1774702004662": {
+      "awayId": "t5",
+      "date": "2026-04-23",
+      "homeId": "t12",
+      "id": "1774702004662",
+      "time": "12:15",
+      "venue": "",
+      "week": 2
+    },
+    "1774702114552": {
+      "awayId": "t1",
+      "date": "2026-04-30",
+      "homeId": "t4",
+      "id": "1774702114552",
+      "time": "12:15",
+      "venue": "",
+      "week": 3
+    },
+    "1774702159233": {
+      "awayId": "t6",
+      "date": "2026-04-29",
+      "homeId": "t2",
+      "id": "1774702159233",
+      "time": "12:15",
+      "venue": "",
+      "week": 3
+    },
+    "1774702201398": {
+      "awayId": "t8",
+      "date": "2026-04-27",
+      "homeId": "t5",
+      "id": "1774702201398",
+      "time": "12:15",
+      "venue": "",
+      "week": 3
+    },
+    "1774702213655": {
+      "awayId": "t12",
+      "date": "2026-04-28",
+      "homeId": "t7",
+      "id": "1774702213655",
+      "time": "12:15",
+      "venue": "",
+      "week": 3
+    },
+    "1774702262307": {
+      "awayId": "t1",
+      "date": "2026-05-04",
+      "homeId": "t8",
+      "id": "1774702262307",
+      "time": "12:15",
+      "venue": "",
+      "week": 4
+    },
+    "1774702278715": {
+      "awayId": "t10",
+      "date": "2026-05-05",
+      "homeId": "t6",
+      "id": "1774702278715",
+      "time": "12:15",
+      "venue": "",
+      "week": 4
+    },
+    "1774702293630": {
+      "awayId": "t2",
+      "date": "2026-05-06",
+      "homeId": "t12",
+      "id": "1774702293630",
+      "time": "12:15",
+      "venue": "",
+      "week": 4
+    },
+    "1774702314269": {
+      "awayId": "t7",
+      "date": "2026-05-07",
+      "homeId": "t5",
+      "id": "1774702314269",
+      "time": "12:15",
+      "venue": "",
+      "week": 4
+    },
+    "1774702350615": {
+      "awayId": "t8",
+      "date": "2026-05-11",
+      "homeId": "t7",
+      "id": "1774702350615",
+      "time": "12:15",
+      "venue": "",
+      "week": 5
+    },
+    "1774702361698": {
+      "awayId": "t5",
+      "date": "2026-05-12",
+      "homeId": "t2",
+      "id": "1774702361698",
+      "time": "12:15",
+      "venue": "",
+      "week": 5
+    },
+    "1774702375769": {
+      "awayId": "t12",
+      "date": "2026-05-13",
+      "homeId": "t10",
+      "id": "1774702375769",
+      "time": "12:15",
+      "venue": "",
+      "week": 5
+    },
+    "1774702392847": {
+      "awayId": "t6",
+      "date": "2026-05-14",
+      "homeId": "t4",
+      "id": "1774702392847",
+      "time": "12:15",
+      "venue": "",
+      "week": 5
+    },
+    "1774702424863": {
+      "awayId": "t1",
+      "date": "2026-05-18",
+      "homeId": "t6",
+      "id": "1774702424863",
+      "time": "12:15",
+      "venue": "",
+      "week": 6
+    },
+    "1774702505212": {
+      "awayId": "t4",
+      "date": "2026-05-20",
+      "homeId": "t12",
+      "id": "1774702505212",
+      "time": "12:15",
+      "venue": "",
+      "week": 6
+    },
+    "1774702523376": {
+      "awayId": "t10",
+      "date": "2026-05-21",
+      "homeId": "t5",
+      "id": "1774702523376",
+      "time": "12:15",
+      "venue": "",
+      "week": 6
+    },
+    "1774702540565": {
+      "awayId": "t2",
+      "date": "2026-05-22",
+      "homeId": "t7",
+      "id": "1774702540565",
+      "time": "12:15",
+      "venue": "",
+      "week": 6
+    },
+    "1774702563500": {
+      "awayId": "t8",
+      "date": "2026-05-25",
+      "homeId": "t2",
+      "id": "1774702563500",
+      "time": "12:15",
+      "venue": "",
+      "week": 7
+    },
+    "1774702578614": {
+      "awayId": "t7",
+      "date": "2026-05-26",
+      "homeId": "t10",
+      "id": "1774702578614",
+      "time": "12:15",
+      "venue": "",
+      "week": 7
+    },
+    "1774702586350": {
+      "awayId": "t5",
+      "date": "2026-05-27",
+      "homeId": "t4",
+      "id": "1774702586350",
+      "time": "12:15",
+      "venue": "",
+      "week": 7
+    },
+    "1774702601922": {
+      "awayId": "t12",
+      "date": "2026-05-28",
+      "homeId": "t1",
+      "id": "1774702601922",
+      "time": "12:15",
+      "venue": "",
+      "week": 7
+    },
+    "1774702821623": {
+      "awayId": "t6",
+      "date": "2026-06-01",
+      "homeId": "t8",
+      "id": "1774702821623",
+      "time": "12:15",
+      "venue": "",
+      "week": 8
+    },
+    "1774702836247": {
+      "awayId": "t1",
+      "date": "2026-06-02",
+      "homeId": "t5",
+      "id": "1774702836247",
+      "time": "12:15",
+      "venue": "",
+      "week": 8
+    },
+    "1774702849235": {
+      "awayId": "t4",
+      "date": "2026-06-03",
+      "homeId": "t7",
+      "id": "1774702849235",
+      "time": "12:15",
+      "venue": "",
+      "week": 8
+    },
+    "1774702865556": {
+      "awayId": "t10",
+      "date": "2026-06-04",
+      "homeId": "t2",
+      "id": "1774702865556",
+      "time": "12:15",
+      "venue": "",
+      "week": 8
+    },
+    "1774702898445": {
+      "awayId": "t8",
+      "date": "2026-06-08",
+      "homeId": "t10",
+      "id": "1774702898445",
+      "time": "12:15",
+      "venue": "",
+      "week": 9
+    },
+    "1774702922544": {
+      "awayId": "t2",
+      "date": "2026-06-09",
+      "homeId": "t4",
+      "id": "1774702922544",
+      "time": "12:15",
+      "venue": "",
+      "week": 9
+    },
+    "1774702932553": {
+      "awayId": "t7",
+      "date": "2026-06-10",
+      "homeId": "t1",
+      "id": "1774702932553",
+      "time": "12:15",
+      "venue": "",
+      "week": 9
+    },
+    "1774702947642": {
+      "awayId": "t12",
+      "date": "2026-06-11",
+      "homeId": "t6",
+      "id": "1774702947642",
+      "time": "12:15",
+      "venue": "",
+      "week": 9
+    }
+  },
+  "fl_players": {
+    "1774627898915": {
+      "id": "1774627898915",
+      "name": "Yavuz Kaya",
+      "number": 1,
+      "position": "KLC",
+      "teamId": "t2"
+    },
+    "1774628191950": {
+      "id": "1774628191950",
+      "name": "Deniz Gürkan",
+      "number": 99,
+      "position": "OS",
+      "teamId": "t12"
+    },
+    "1774634170543": {
+      "id": "1774634170543",
+      "name": "Enis Ertürk",
+      "number": 13,
+      "position": "MDOS",
+      "teamId": "t2"
+    },
+    "1774634470475": {
+      "id": "1774634470475",
+      "name": "Yusuf say",
+      "number": 5,
+      "position": "STP",
+      "teamId": "t2"
+    },
+    "1774634507324": {
+      "id": "1774634507324",
+      "name": "Çağdaş Kafes",
+      "number": 10,
+      "position": "OS",
+      "teamId": "t2"
+    },
+    "1774634530139": {
+      "id": "1774634530139",
+      "name": "Poyraz Suyolcu",
+      "number": 37,
+      "position": "STR",
+      "teamId": "t2"
+    },
+    "1774634570881": {
+      "id": "1774634570881",
+      "name": "Mete Gökkurt",
+      "number": 7,
+      "position": "STP",
+      "teamId": "t2"
+    },
+    "1774635094350": {
+      "id": "1774635094350",
+      "name": "Ali Emre Aydın",
+      "number": 8,
+      "position": "OS",
+      "teamId": "t5"
+    },
+    "1774635227367": {
+      "id": "1774635227367",
+      "name": "Deniz KEMAL Kara",
+      "number": 99,
+      "position": "STP",
+      "teamId": "t2"
+    },
+    "1774648659171": {
+      "id": "1774648659171",
+      "name": "Çağan Saydam",
+      "number": 6,
+      "position": "STR",
+      "teamId": "t8"
+    },
+    "1774648694332": {
+      "id": "1774648694332",
+      "name": "Kayra Küçükarık",
+      "number": 5,
+      "position": "STP",
+      "teamId": "t8"
+    },
+    "1774648724479": {
+      "id": "1774648724479",
+      "name": "Eymen Çakır",
+      "number": 3,
+      "position": "STP",
+      "teamId": "t8"
+    },
+    "1774648751128": {
+      "id": "1774648751128",
+      "name": "Emre Özalp",
+      "number": 10,
+      "position": "SK",
+      "teamId": "t8"
+    },
+    "1774648770616": {
+      "id": "1774648770616",
+      "name": "Ensar Gezer",
+      "number": 4,
+      "position": "STP",
+      "teamId": "t8"
+    },
+    "1774648808613": {
+      "id": "1774648808613",
+      "name": "Arda Gökhan",
+      "number": 69,
+      "position": "OS",
+      "teamId": "t8"
+    },
+    "1774648917499": {
+      "id": "1774648917499",
+      "name": "Ada Çınar",
+      "number": 1,
+      "position": "KLC",
+      "teamId": "t8"
+    },
+    "1774648951561": {
+      "id": "1774648951561",
+      "name": "Mustafa Yiğit Güner",
+      "number": 90,
+      "position": "KLC",
+      "teamId": "t8"
+    },
+    "1774649041752": {
+      "id": "1774649041752",
+      "name": "Ege Genç",
+      "number": 99,
+      "position": "STP",
+      "teamId": "t8"
+    },
+    "1774706206701": {
+      "id": "1774706206701",
+      "name": "Enes Güney Şenol",
+      "number": 7,
+      "position": "SK",
+      "teamId": "t5"
+    },
+    "1774706215798": {
+      "id": "1774706215798",
+      "name": "Ahmet Büke",
+      "number": 31,
+      "position": "KLC",
+      "teamId": "t5"
+    },
+    "1774706403755": {
+      "id": "1774706403755",
+      "name": "Alp Kayra Keleş",
+      "number": 10,
+      "position": "SOK",
+      "teamId": "t5"
+    },
+    "1774724601252": {
+      "id": "1774724601252",
+      "name": "Umut Rüzgar Yelgi",
+      "number": 19,
+      "position": "STP",
+      "teamId": "t5"
+    },
+    "1774724652411": {
+      "id": "1774724652411",
+      "name": "İbrahim Aykan Bayram",
+      "number": 99,
+      "position": "STR",
+      "teamId": "t5"
+    },
+    "1774724673690": {
+      "id": "1774724673690",
+      "name": "Arda Demjan",
+      "number": 9,
+      "position": "STR",
+      "teamId": "t5"
+    },
+    "1774724701307": {
+      "id": "1774724701307",
+      "name": "Yusuf Yılmaz Ustaalioğlu",
+      "number": 61,
+      "position": "KLC",
+      "teamId": "t5"
+    },
+    "1774724817415": {
+      "id": "1774724817415",
+      "name": "Ömer Çalışkan",
+      "number": 17,
+      "position": "MDOS",
+      "teamId": "t5"
+    },
+    "1774724906325": {
+      "id": "1774724906325",
+      "name": "Tuna Ata Yavuz",
+      "number": 31,
+      "position": "KLC",
+      "teamId": "t6"
+    },
+    "1774725590756": {
+      "id": "1774725590756",
+      "name": "Caner Demir Avaroğlu",
+      "number": 1,
+      "position": "STP",
+      "teamId": "t6"
+    },
+    "1774725954292": {
+      "id": "1774725954292",
+      "name": "Mehmet Yiğit Gazel",
+      "number": 8,
+      "position": "OS",
+      "teamId": "t6"
+    },
+    "1774726235634": {
+      "id": "1774726235634",
+      "name": "Sarp Doruk Kaplan",
+      "number": 20,
+      "position": "SK",
+      "teamId": "t6"
+    },
+    "1774728039748": {
+      "id": "1774728039748",
+      "name": "Ercan Özdemir",
+      "number": 8,
+      "position": "STP",
+      "teamId": "t12"
+    },
+    "1774728483424": {
+      "id": "1774728483424",
+      "name": "Demir Palaoğlu",
+      "number": 7,
+      "position": "OS",
+      "teamId": "t6"
+    },
+    "1774728516981": {
+      "id": "1774728516981",
+      "name": "İbrahim Doruk Kes",
+      "number": 12,
+      "position": "STP",
+      "teamId": "t6"
+    },
+    "1774728538666": {
+      "id": "1774728538666",
+      "name": "Çağan Özcan",
+      "number": 16,
+      "position": "STR",
+      "teamId": "t6"
+    },
+    "1774728557064": {
+      "id": "1774728557064",
+      "name": "Yiğit Ege Tokbay",
+      "number": 38,
+      "position": "SOK",
+      "teamId": "t6"
+    },
+    "1774728571640": {
+      "id": "1774728571640",
+      "name": "Aras Frangalı",
+      "number": 23,
+      "position": "MDOS",
+      "teamId": "t6"
+    },
+    "1774729841414": {
+      "id": "1774729841414",
+      "name": "Ömer Berke Karataban",
+      "number": 88,
+      "position": "KLC",
+      "teamId": "t7"
+    },
+    "1774729921617": {
+      "id": "1774729921617",
+      "name": "Koray Göncü",
+      "number": 7,
+      "position": "SOK",
+      "teamId": "t7"
+    },
+    "1774729952445": {
+      "id": "1774729952445",
+      "name": "Kerem Batu Ergün",
+      "number": 3,
+      "position": "STP",
+      "teamId": "t7"
+    },
+    "1774729978857": {
+      "id": "1774729978857",
+      "name": "Deniz Bingöl",
+      "number": 6,
+      "position": "MDOS",
+      "teamId": "t7"
+    },
+    "1774729998457": {
+      "id": "1774729998457",
+      "name": "Berat Kırcı",
+      "number": 9,
+      "position": "STR",
+      "teamId": "t7"
+    },
+    "1774730023814": {
+      "id": "1774730023814",
+      "name": "Yağız Özdemir",
+      "number": 1,
+      "position": "KLC",
+      "teamId": "t7"
+    },
+    "1774730041540": {
+      "id": "1774730041540",
+      "name": "Doruk Yüksel",
+      "number": 2,
+      "position": "STP",
+      "teamId": "t7"
+    },
+    "1774730118291": {
+      "id": "1774730118291",
+      "name": "Subay",
+      "number": 16,
+      "position": "SOK",
+      "teamId": "t7"
+    },
+    "1774730145555": {
+      "id": "1774730145555",
+      "name": "Ramazan Ömer Gençtürk",
+      "number": 5,
+      "position": "MDOS",
+      "teamId": "t7"
+    },
+    "1774876992678": {
+      "id": "1774876992678",
+      "name": "Meriç Kader",
+      "number": 2,
+      "position": "STP",
+      "teamId": "t10"
+    },
+    "1774877022493": {
+      "id": "1774877022493",
+      "name": "Ayaz Okatan",
+      "number": 4,
+      "position": "STP",
+      "teamId": "t10"
+    },
+    "1774877042914": {
+      "id": "1774877042914",
+      "name": "Gürkan Şafak",
+      "number": 9,
+      "position": "STR",
+      "teamId": "t10"
+    },
+    "1774877061460": {
+      "id": "1774877061460",
+      "name": "Mustafa Üçer",
+      "number": 10,
+      "position": "OS",
+      "teamId": "t10"
+    },
+    "1774877085595": {
+      "id": "1774877085595",
+      "name": "Ömer Faruk Gümüş",
+      "number": 99,
+      "position": "KLC",
+      "teamId": "t10"
+    },
+    "1774877139185": {
+      "id": "1774877139185",
+      "name": "Atakan Gülünay",
+      "number": 7,
+      "position": "SK",
+      "teamId": "t10"
+    },
+    "1774877172380": {
+      "id": "1774877172380",
+      "name": "Ezgi Özbay",
+      "number": 77,
+      "position": "SK",
+      "teamId": "t10"
+    },
+    "1774886875487": {
+      "id": "1774886875487",
+      "name": "Haktan Dönmez",
+      "number": 99,
+      "position": "KLC",
+      "teamId": "t1"
+    },
+    "1774886921093": {
+      "id": "1774886921093",
+      "name": "Yusuf  Dönmez",
+      "number": 9,
+      "position": "SK",
+      "teamId": "t1"
+    },
+    "1774886949618": {
+      "id": "1774886949618",
+      "name": "Tolga Peldek",
+      "number": 17,
+      "position": "OS",
+      "teamId": "t1"
+    },
+    "1774886970105": {
+      "id": "1774886970105",
+      "name": "Uras Selbaşı",
+      "number": 10,
+      "position": "STR",
+      "teamId": "t1"
+    },
+    "1774886990768": {
+      "id": "1774886990768",
+      "name": "Yağız kılınç",
+      "number": 8,
+      "position": "STP",
+      "teamId": "t1"
+    },
+    "1774887071707": {
+      "id": "1774887071707",
+      "name": "Ali Adıgüzel",
+      "number": 88,
+      "position": "KLC",
+      "teamId": "t2"
+    },
+    "1774887139008": {
+      "id": "1774887139008",
+      "name": "Sebahattin Çelik",
+      "number": 33,
+      "position": "STP",
+      "teamId": "t2"
+    },
+    "1774887643838": {
+      "id": "1774887643838",
+      "name": "Beykan Kaya Karayıldız",
+      "number": 45,
+      "position": "STR",
+      "teamId": "t4"
+    },
+    "1774887785287": {
+      "id": "1774887785287",
+      "name": "Onur Kerem Akyıldız",
+      "number": 57,
+      "position": "STP",
+      "teamId": "t4"
+    },
+    "1774887801554": {
+      "id": "1774887801554",
+      "name": "Tolgahan Besir",
+      "number": 31,
+      "position": "KLC",
+      "teamId": "t4"
+    },
+    "1774887835838": {
+      "id": "1774887835838",
+      "name": "Yağız Vural",
+      "number": 7,
+      "position": "OS",
+      "teamId": "t4"
+    },
+    "1774887856311": {
+      "id": "1774887856311",
+      "name": "Alperen Bozkır",
+      "number": 66,
+      "position": "STP",
+      "teamId": "t4"
+    },
+    "1774887901970": {
+      "id": "1774887901970",
+      "name": "Bera Sığırcı",
+      "number": 10,
+      "position": "MDOS",
+      "teamId": "t4"
+    },
+    "1774934648557": {
+      "id": "1774934648557",
+      "name": "Kayra Karadağ",
+      "number": 1,
+      "position": "KLC",
+      "teamId": "t12"
+    },
+    "1774934679139": {
+      "id": "1774934679139",
+      "name": "Enes Erçin",
+      "number": 31,
+      "position": "STP",
+      "teamId": "t12"
+    },
+    "1774934716981": {
+      "id": "1774934716981",
+      "name": "Berkay Akkaya",
+      "number": 6,
+      "position": "OS",
+      "teamId": "t12"
+    },
+    "1774934742553": {
+      "id": "1774934742553",
+      "name": "Burak Düşmez",
+      "number": 7,
+      "position": "OS",
+      "teamId": "t12"
+    },
+    "1774934758820": {
+      "id": "1774934758820",
+      "name": "Yağız Ocak",
+      "number": 10,
+      "position": "MDOS",
+      "teamId": "t12"
+    }
+  },
+  "fl_teams": {
+    "t1": {
+      "color": "#4f7cff",
+      "id": "t1",
+      "name": "9A"
+    },
+    "t10": {
+      "color": "#f59e0b",
+      "id": "t10",
+      "name": "11B"
+    },
+    "t12": {
+      "color": "#6366f1",
+      "id": "t12",
+      "name": "11D"
+    },
+    "t2": {
+      "color": "#f5c542",
+      "id": "t2",
+      "name": "9B"
+    },
+    "t4": {
+      "color": "#ef4444",
+      "id": "t4",
+      "name": "9D"
+    },
+    "t5": {
+      "color": "#a855f7",
+      "id": "t5",
+      "name": "10A"
+    },
+    "t6": {
+      "color": "#f97316",
+      "id": "t6",
+      "name": "10B"
+    },
+    "t7": {
+      "color": "#06b6d4",
+      "id": "t7",
+      "name": "10C"
+    },
+    "t8": {
+      "color": "#ec4899",
+      "id": "t8",
+      "name": "10D"
+    }
+  }
+}

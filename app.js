@@ -5,14 +5,14 @@
 // ── FIREBASE CONFIG ────────────────────────
 // Firebase Console'dan aldığınız config bilgilerini buraya yapıştırın:
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyCZ0dP9kS3QGEqKPlXmh_oevf_CtJBuhvU",
-  authDomain:        "yssal-futbol-ligi.firebaseapp.com",
-  databaseURL:       "https://yssal-futbol-ligi-default-rtdb.firebaseio.com",
-  projectId:         "yssal-futbol-ligi",
-  storageBucket:     "yssal-futbol-ligi.firebasestorage.app",
+  apiKey: "AIzaSyCZ0dP9kS3QGEqKPlXmh_oevf_CtJBuhvU",
+  authDomain: "yssal-futbol-ligi.firebaseapp.com",
+  databaseURL: "https://yssal-futbol-ligi-default-rtdb.firebaseio.com",
+  projectId: "yssal-futbol-ligi",
+  storageBucket: "yssal-futbol-ligi.firebasestorage.app",
   messagingSenderId: "490980348074",
-  appId:             "1:490980348074:web:bda46aaf37a3b69ac080d3",
-  measurementId:     "G-CDKNF2MSEY"
+  appId: "1:490980348074:web:bda46aaf37a3b69ac080d3",
+  measurementId: "G-CDKNF2MSEY"
 };
 
 // ── IN-MEMORY CACHE (Firebase'den senkronize edilir) ─
@@ -20,26 +20,33 @@ let CACHE = { teams: [], players: [], results: [], fixtures: [] };
 
 // ── DATA STORE ────────────────────────────
 const DB = {
-  get teams()    { return CACHE.teams; },
-  get players()  { return CACHE.players; },
-  get results()  { return CACHE.results; },
+  get teams() { return CACHE.teams; },
+  get players() { return CACHE.players; },
+  get results() { return CACHE.results; },
   get fixtures() { return CACHE.fixtures; },
-  _toObj(arr)    { const o = {}; arr.forEach(x => o[x.id] = x); return o; },
-  saveTeams(v)    { CACHE.teams    = v; firebase.database().ref('fl_teams').set(v.length    ? this._toObj(v) : null); },
-  savePlayers(v)  { CACHE.players  = v; firebase.database().ref('fl_players').set(v.length  ? this._toObj(v) : null); },
-  saveResults(v)  { CACHE.results  = v; firebase.database().ref('fl_results').set(v.length  ? this._toObj(v) : null); },
-  saveFixtures(v) { CACHE.fixtures = v; firebase.database().ref('fl_fixtures').set(v.length ? this._toObj(v) : null); },
+  _toObj(arr) { const o = {}; arr.forEach(x => o[x.id] = x); return o; },
+  saveTeams(v) { CACHE.teams = v; firebase.database().ref('fl_teams').set(v.length ? this._toObj(v) : null).catch(e => alert("Teams Error: " + e.message)); },
+  savePlayers(v) { CACHE.players = v; firebase.database().ref('fl_players').set(v.length ? this._toObj(v) : null).catch(e => alert("Players Error: " + e.message)); },
+  saveResults(v) { CACHE.results = v; firebase.database().ref('fl_results').set(v.length ? this._toObj(v) : null).catch(e => alert("Results Error: " + e.message)); },
+  saveFixtures(v) { CACHE.fixtures = v; firebase.database().ref('fl_fixtures').set(v.length ? this._toObj(v) : null).catch(e => alert("Fixtures Error: " + e.message)); },
+  // Batch save to avoid multiple triggers on root listener
+  saveAll(teams, players, results, fixtures) {
+    if (players)  { CACHE.players  = players;  updates['fl_players']  = players.length  ? this._toObj(players)  : null; }
+    if (results)  { CACHE.results  = results;  updates['fl_results']  = results.length  ? this._toObj(results)  : null; }
+    if (fixtures) { CACHE.fixtures = fixtures; updates['fl_fixtures'] = fixtures.length ? this._toObj(fixtures) : null; }
+    firebase.database().ref().update(updates);
+  }
 };
 
 // ── WEATHER ENGINE ────────────────────────
 const WEATHER_PROFILES = [
-  { icon: '☀️',  desc: 'Açık', tempBase: 16 },
+  { icon: '☀️', desc: 'Açık', tempBase: 16 },
   { icon: '🌤️', desc: 'Az Bulutlu', tempBase: 14 },
-  { icon: '⛅',  desc: 'Parçalı Bulutlu', tempBase: 13 },
+  { icon: '⛅', desc: 'Parçalı Bulutlu', tempBase: 13 },
   { icon: '🌥️', desc: 'Çok Bulutlu', tempBase: 11 },
-  { icon: '🌦️', desc: 'Aralıklı Yağmur', tempBase: 9  },
-  { icon: '🌧️', desc: 'Yağmurlu', tempBase: 8  },
-  { icon: '🌩️', desc: 'Fırtınalı', tempBase: 7  },
+  { icon: '🌦️', desc: 'Aralıklı Yağmur', tempBase: 9 },
+  { icon: '🌧️', desc: 'Yağmurlu', tempBase: 8 },
+  { icon: '🌩️', desc: 'Fırtınalı', tempBase: 7 },
 ];
 // Seed from date so weather is stable for the day but changes day-to-day
 function dayWeatherSeed() {
@@ -52,17 +59,17 @@ function seededRand(seed, offset) {
 }
 
 function buildWeather() {
-  const seed    = dayWeatherSeed();
+  const seed = dayWeatherSeed();
   const profIdx = Math.floor(seededRand(seed, 1) * WEATHER_PROFILES.length);
   const profile = WEATHER_PROFILES[profIdx];
-  const now     = new Date();
-  const nowH    = now.getHours();
+  const now = new Date();
+  const nowH = now.getHours();
 
   // Generate 24h temps: sine curve peaking at 14:00
   function hourTemp(h) {
-    const base   = profile.tempBase;
-    const curve  = Math.sin(((h - 6) / 24) * Math.PI * 2) * 5;
-    const noise  = (seededRand(seed, h + 100) - 0.5) * 2;
+    const base = profile.tempBase;
+    const curve = Math.sin(((h - 6) / 24) * Math.PI * 2) * 5;
+    const noise = (seededRand(seed, h + 100) - 0.5) * 2;
     return Math.round(base + curve + noise);
   }
 
@@ -83,10 +90,10 @@ function buildWeather() {
 }
 
 function renderWeather() {
-  const w        = buildWeather();
-  const nowEl    = document.getElementById('weatherNow');
-  const hoursEl  = document.getElementById('weatherHours');
-  const now      = new Date();
+  const w = buildWeather();
+  const nowEl = document.getElementById('weatherNow');
+  const hoursEl = document.getElementById('weatherHours');
+  const now = new Date();
 
   nowEl.innerHTML = `
     <span class="w-icon">${w.profile.icon}</span>
@@ -96,7 +103,7 @@ function renderWeather() {
     </div>`;
 
   hoursEl.innerHTML = w.hours.map(h => {
-    const label = h.isCurrent ? 'Şimdi' : `${String(h.h).padStart(2,'0')}:00`;
+    const label = h.isCurrent ? 'Şimdi' : `${String(h.h).padStart(2, '0')}:00`;
     return `<div class="weather-hour${h.isCurrent ? ' current' : ''}">
       <span class="wh-time">${label}</span>
       <span class="wh-icon">${h.icon}</span>
@@ -107,7 +114,7 @@ function renderWeather() {
 
 // ── STANDINGS ENGINE ──────────────────────
 function computeStandings() {
-  const teams   = DB.teams;
+  const teams = DB.teams;
   const results = DB.results;
   const map = {};
 
@@ -125,7 +132,7 @@ function computeStandings() {
     h.played++; a.played++;
     h.goalsFor += r.homeScore; h.goalsAgainst += r.awayScore;
     a.goalsFor += r.awayScore; a.goalsAgainst += r.homeScore;
-    if (r.homeScore > r.awayScore)      { h.won++; h.points += 3; a.lost++; }
+    if (r.homeScore > r.awayScore) { h.won++; h.points += 3; a.lost++; }
     else if (r.homeScore < r.awayScore) { a.won++; a.points += 3; h.lost++; }
     else { h.drawn++; h.points++; a.drawn++; a.points++; }
   });
@@ -141,15 +148,15 @@ function computeStandings() {
 // ── RENDER STANDINGS ─────────────────────
 function renderStandings() {
   const tbody = document.getElementById('standingsBody');
-  const rows  = computeStandings();
+  const rows = computeStandings();
   const total = rows.length;
   if (!rows.length) {
     tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Yönetim panelinden takım ekleyin.</td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map((t, i) => {
-    const rank  = i + 1;
-    const gd    = t.goalsFor - t.goalsAgainst;
+    const rank = i + 1;
+    const gd = t.goalsFor - t.goalsAgainst;
     const gdStr = gd > 0 ? `+${gd}` : `${gd}`;
     let rankHtml = rank;
     if (rank === 1) rankHtml = `<span class="rank-badge rank-1">1</span>`;
@@ -169,9 +176,15 @@ function renderStandings() {
 
 // ── RENDER RESULTS ────────────────────────
 function renderResults(filterWeek = 'all') {
-  const grid    = document.getElementById('resultsGrid');
-  const teams   = DB.teams;
-  let results   = [...DB.results].sort((a, b) => b.week - a.week || b.date.localeCompare(a.date));
+  const grid = document.getElementById('resultsGrid');
+  const teams = DB.teams;
+  let results = [...DB.results].sort((a, b) => {
+    const w = b.week - a.week;
+    if (w !== 0) return w;
+    const d1 = b.date || '';
+    const d2 = a.date || '';
+    return d1.localeCompare(d2);
+  });
   if (filterWeek !== 'all') results = results.filter(r => r.week == filterWeek);
 
   if (!results.length) { grid.innerHTML = `<div class="empty-state">Henüz maç sonucu eklenmemiş.</div>`; return; }
@@ -181,21 +194,21 @@ function renderResults(filterWeek = 'all') {
 }
 
 function buildResultCard(r, findTeam) {
-  const h    = findTeam(r.homeId);
-  const a    = findTeam(r.awayId);
-  const date = r.date ? new Date(r.date + 'T00:00:00').toLocaleDateString('tr-TR', { day:'2-digit', month:'short' }) : '';
+  const h = findTeam(r.homeId);
+  const a = findTeam(r.awayId);
+  const date = r.date ? new Date(r.date + 'T00:00:00').toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' }) : '';
   const hWin = r.homeScore > r.awayScore, aWin = r.awayScore > r.homeScore;
 
   // Event pills
-  const events = (r.events || []).slice().sort((x,y) => x.minute - y.minute);
+  const events = (r.events || []).slice().sort((x, y) => x.minute - y.minute);
   let pillsHtml = '';
   if (events.length) {
     pillsHtml = `<div class="match-events-strip">` +
       events.map(ev => {
         if (ev.type === 'goal') {
           const players = DB.players;
-          const scorer  = players.find(p => p.id === ev.playerId);
-          const assist  = ev.assistId ? players.find(p => p.id === ev.assistId) : null;
+          const scorer = players.find(p => p.id === ev.playerId);
+          const assist = ev.assistId ? players.find(p => p.id === ev.assistId) : null;
           const assistTxt = assist ? ` <span style="opacity:.7">(${assist.name})</span>` : '';
           return `<span class="event-pill goal-pill"><span class="ep-min">${ev.minute}'</span> ⚽ ${scorer?.name || '?'}${assistTxt}</span>`;
         } else if (ev.type === 'yellow') {
@@ -233,15 +246,15 @@ function buildResultCard(r, findTeam) {
 
 // ── RENDER FIXTURES ───────────────────────
 function renderFixtures() {
-  const grid     = document.getElementById('fixturesGrid');
-  const teams    = DB.teams;
-  const fixtures = [...DB.fixtures].sort((a,b) => a.date.localeCompare(b.date));
+  const grid = document.getElementById('fixturesGrid');
+  const teams = DB.teams;
+  const fixtures = [...DB.fixtures].sort((a, b) => a.date.localeCompare(b.date));
   if (!fixtures.length) { grid.innerHTML = `<div class="empty-state">Henüz fikstür eklenmemiş.</div>`; return; }
 
   const findTeam = id => teams.find(t => t.id === id) || { name: '?', color: '#666' };
   grid.innerHTML = fixtures.map(f => {
-    const h    = findTeam(f.homeId), a = findTeam(f.awayId);
-    const date = f.date ? new Date(f.date + 'T00:00:00').toLocaleDateString('tr-TR', { weekday:'long', day:'2-digit', month:'long' }) : '';
+    const h = findTeam(f.homeId), a = findTeam(f.awayId);
+    const date = f.date ? new Date(f.date + 'T00:00:00').toLocaleDateString('tr-TR', { weekday: 'long', day: '2-digit', month: 'long' }) : '';
     return `
     <div class="match-card upcoming">
       <div class="match-card-top">
@@ -263,20 +276,19 @@ function renderFixtures() {
 
 // ── RENDER TEAMS TAB ──────────────────────
 function renderTeamsTab() {
-  const grid    = document.getElementById('teamsGrid');
-  const teams   = DB.teams;
+  const grid = document.getElementById('teamsGrid');
+  const teams = DB.teams;
   const players = DB.players;
   if (!teams.length) { grid.innerHTML = `<div class="empty-state">Yönetim panelinden takım ekleyin.</div>`; return; }
 
   grid.innerHTML = teams.map(t => {
-    const tp = players.filter(p => p.teamId === t.id).sort((a,b) => a.number - b.number);
+    const tp = players.filter(p => p.teamId === t.id).sort((a, b) => a.number - b.number);
     const playerRows = tp.length
       ? tp.map(p => `
           <div class="player-row">
             <div class="player-num">${p.number}</div>
             <div class="player-name">${p.name}</div>
             <div class="player-pos">${p.position}</div>
-            ${adminUnlocked ? `<button class="btn-icon" onclick="event.stopPropagation();deletePlayer('${p.id}')" title="Sil">✕</button>` : ''}
           </div>`).join('')
       : `<div style="padding:14px 18px;font-size:.82rem;color:var(--text-muted)">Henüz oyuncu eklenmemiş.</div>`;
 
@@ -297,7 +309,7 @@ function renderTeamsTab() {
 // ── HERO STATS ────────────────────────────
 function renderHeroStats() {
   const standings = computeStandings();
-  document.getElementById('totalTeams').textContent   = DB.teams.length;
+  document.getElementById('totalTeams').textContent = DB.teams.length;
   document.getElementById('totalMatches').textContent = DB.results.length;
   const leader = standings[0];
   document.getElementById('leaderName').textContent = leader ? leader.name : '—';
@@ -305,10 +317,10 @@ function renderHeroStats() {
 
 // ── POPULATE SELECTS ──────────────────────
 function populateTeamSelects() {
-  const teams  = DB.teams;
-  const opts   = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-  const blank  = `<option value="">Seçin</option>`;
-  ['homeTeam','awayTeam','fixtureHome','fixtureAway','playerTeam'].forEach(id => {
+  const teams = DB.teams;
+  const opts = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  const blank = `<option value="">Seçin</option>`;
+  ['homeTeam', 'awayTeam', 'fixtureHome', 'fixtureAway', 'playerTeam'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = blank + opts;
   });
@@ -316,7 +328,7 @@ function populateTeamSelects() {
 
 // ── ADMIN TEAMS LIST ──────────────────────
 function renderAdminTeamsList() {
-  const list  = document.getElementById('adminTeamsList');
+  const list = document.getElementById('adminTeamsList');
   const teams = DB.teams;
   if (!teams.length) { list.innerHTML = ''; return; }
   list.innerHTML = teams.map(t => `
@@ -331,8 +343,8 @@ function renderAdminTeamsList() {
 
 // ── WEEK FILTER ───────────────────────────
 function populateWeekFilter() {
-  const sel   = document.getElementById('resultFilter');
-  const weeks = [...new Set(DB.results.map(r => r.week))].sort((a,b)=>a-b);
+  const sel = document.getElementById('resultFilter');
+  const weeks = [...new Set(DB.results.map(r => r.week))].sort((a, b) => a - b);
   sel.innerHTML = `<option value="all">Tüm Haftalar</option>` +
     weeks.map(w => `<option value="${w}">Hafta ${w}</option>`).join('');
 }
@@ -341,11 +353,11 @@ function populateWeekFilter() {
 function computePlayerStats() {
   const results = DB.results;
   const players = DB.players;
-  const teams   = DB.teams;
-  const goalMap    = {};  // playerId → count
-  const assistMap  = {};  // playerId → count
-  const yellowMap  = {};  // playerId → count
-  const redMap     = {};  // playerId → count
+  const teams = DB.teams;
+  const goalMap = {};  // playerId → count
+  const assistMap = {};  // playerId → count
+  const yellowMap = {};  // playerId → count
+  const redMap = {};  // playerId → count
 
   results.forEach(r => {
     (r.events || []).forEach(ev => {
@@ -363,7 +375,7 @@ function computePlayerStats() {
   });
 
   const findPlayer = id => players.find(p => p.id === id);
-  const findTeam   = id => teams.find(t => t.id === id);
+  const findTeam = id => teams.find(t => t.id === id);
 
   const scorers = Object.entries(goalMap)
     .map(([pid, count]) => ({ player: findPlayer(pid), count }))
@@ -386,23 +398,23 @@ function computePlayerStats() {
     .sort((a, b) => b.count - a.count);
 
   // Team stats
-  const teamGoals   = {};  // teamId → { scored, conceded, scorers: { playerId: count } }
+  const teamGoals = {};  // teamId → { scored, conceded, scorers: { playerId: count } }
   const teamAssists = {};  // teamId → { total, assisters: { playerId: count } }
-  const teamCards   = {};  // teamId → { yellow, red }
+  const teamCards = {};  // teamId → { yellow, red }
 
   teams.forEach(t => {
-    teamGoals[t.id]   = { scored: 0, conceded: 0, scorers: {} };
+    teamGoals[t.id] = { scored: 0, conceded: 0, scorers: {} };
     teamAssists[t.id] = { total: 0, assisters: {} };
-    teamCards[t.id]   = { yellow: 0, red: 0 };
+    teamCards[t.id] = { yellow: 0, red: 0 };
   });
 
   results.forEach(r => {
     if (teamGoals[r.homeId]) {
-      teamGoals[r.homeId].scored   += r.homeScore;
+      teamGoals[r.homeId].scored += r.homeScore;
       teamGoals[r.homeId].conceded += r.awayScore;
     }
     if (teamGoals[r.awayId]) {
-      teamGoals[r.awayId].scored   += r.awayScore;
+      teamGoals[r.awayId].scored += r.awayScore;
       teamGoals[r.awayId].conceded += r.homeScore;
     }
 
@@ -429,7 +441,7 @@ function computePlayerStats() {
 
 function renderStats() {
   const { scorers, assisters, yellowCards, redCards, teamGoals, teamAssists, teamCards, findPlayer, findTeam } = computePlayerStats();
-  const teams   = DB.teams;
+  const teams = DB.teams;
 
   // ── Gol Krallığı ──
   const scorersEl = document.getElementById('topScorers');
@@ -473,7 +485,7 @@ function renderStats() {
   const goalAnalysisEl = document.getElementById('teamGoalAnalysis');
   const teamGoalRows = teams.map(t => {
     const tg = teamGoals[t.id] || { scored: 0, conceded: 0, scorers: {} };
-    const topScorer = Object.entries(tg.scorers).sort((a,b) => b[1] - a[1])[0];
+    const topScorer = Object.entries(tg.scorers).sort((a, b) => b[1] - a[1])[0];
     const topScorerPlayer = topScorer ? findPlayer(topScorer[0]) : null;
     const avg = DB.results.filter(r => r.homeId === t.id || r.awayId === t.id).length;
     const avgGoal = avg ? (tg.scored / avg).toFixed(1) : '0.0';
@@ -503,7 +515,7 @@ function renderStats() {
   const assistAnalysisEl = document.getElementById('teamAssistAnalysis');
   const teamAssistRows = teams.map(t => {
     const ta = teamAssists[t.id] || { total: 0, assisters: {} };
-    const topAssister = Object.entries(ta.assisters).sort((a,b) => b[1] - a[1])[0];
+    const topAssister = Object.entries(ta.assisters).sort((a, b) => b[1] - a[1])[0];
     const topAssistPlayer = topAssister ? findPlayer(topAssister[0]) : null;
     return { team: t, total: ta.total, topAssistPlayer, topAssistCount: topAssister?.[1] || 0 };
   }).sort((a, b) => b.total - a.total);
@@ -591,16 +603,16 @@ function renderStats() {
 
 // ── FIXTURE MANAGEMENT ────────────────────
 function renderFixtureMgmt() {
-  const list     = document.getElementById('fixtureMgmtList');
+  const list = document.getElementById('fixtureMgmtList');
   if (!list) return;
-  const teams    = DB.teams;
-  const fixtures = [...DB.fixtures].sort((a,b) => (a.week - b.week) || a.date.localeCompare(b.date));
+  const teams = DB.teams;
+  const fixtures = [...DB.fixtures].sort((a, b) => (a.week - b.week) || a.date.localeCompare(b.date));
   if (!fixtures.length) { list.innerHTML = '<div class="empty-state">Henüz fikstür eklenmemiş.</div>'; return; }
 
   const findTeam = id => teams.find(t => t.id === id) || { name: '?', color: '#666' };
   list.innerHTML = fixtures.map(f => {
     const h = findTeam(f.homeId), a = findTeam(f.awayId);
-    const dateStr = f.date ? new Date(f.date + 'T00:00:00').toLocaleDateString('tr-TR', { day:'2-digit', month:'short' }) : '—';
+    const dateStr = f.date ? new Date(f.date + 'T00:00:00').toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' }) : '—';
     return `
     <div class="fixture-mgmt-item" data-fid="${f.id}">
       <div class="fmgmt-info">
@@ -613,6 +625,7 @@ function renderFixtureMgmt() {
         <span class="fmgmt-date">${dateStr} · ${f.time || '—'}</span>
       </div>
       <div class="fmgmt-actions">
+        <button class="btn-icon btn-add-res" onclick="fillResultFromFixture('${f.id}')" title="Maç Sonucu Gir">⚽</button>
         <input type="date" class="fmgmt-date-input" value="${f.date || ''}" onchange="updateFixtureDate('${f.id}', this.value)" title="Tarih değiştir" />
         <input type="time" class="fmgmt-time-input" value="${f.time || '14:00'}" onchange="updateFixtureTime('${f.id}', this.value)" title="Saat değiştir" />
         <button class="btn-icon" onclick="deleteFixture('${f.id}')" title="Fikstürü Sil">✕</button>
@@ -621,19 +634,70 @@ function renderFixtureMgmt() {
   }).join('');
 }
 
-window.updateFixtureDate = function(fid, newDate) {
+// ── MATCH MANAGEMENT ──────────────────────
+function renderMatchMgmt() {
+  const list = document.getElementById('matchMgmtList');
+  if (!list) return;
+  const teams = DB.teams;
+  let results = [...DB.results].sort((a, b) => {
+    const w = b.week - a.week;
+    if (w !== 0) return w;
+    const d1 = b.date || '';
+    const d2 = a.date || '';
+    return d1.localeCompare(d2);
+  });
+  if (!results.length) { list.innerHTML = '<div class="empty-state">Henüz maç sonucu eklenmemiş.</div>'; return; }
+
+  const findTeam = id => teams.find(t => t.id === id) || { name: '?', color: '#666' };
+  list.innerHTML = results.map(r => {
+    const h = findTeam(r.homeId), a = findTeam(r.awayId);
+    const dateStr = r.date ? new Date(r.date + 'T00:00:00').toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' }) : '—';
+    return `
+    <div class="fixture-mgmt-item" data-rid="${r.id}">
+      <div class="fmgmt-info">
+        <span class="fmgmt-week">H${r.week}</span>
+        <span class="fmgmt-teams">
+          <span class="team-dot" style="background:${h.color}"></span>${h.name}
+          <span class="fmgmt-vs" style="font-weight:bold; color:var(--text); background:none; padding:0 8px">${r.homeScore} - ${r.awayScore}</span>
+          <span class="team-dot" style="background:${a.color}"></span>${a.name}
+        </span>
+        <span class="fmgmt-date">${dateStr}</span>
+      </div>
+      <div class="fmgmt-actions">
+        <button class="btn-icon" onclick="deleteResult('${r.id}')" title="Maçı Sil" style="color:var(--red)">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.fillResultFromFixture = function (fid) {
+  const f = DB.fixtures.find(x => x.id === fid);
+  if (!f) return;
+  document.getElementById('matchWeek').value = f.week;
+  document.getElementById('matchDate').value = f.date;
+  document.getElementById('homeTeam').value = f.homeId;
+  document.getElementById('awayTeam').value = f.awayId;
+  updateLineupSelects();
+  document.getElementById('addResultForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const card = document.querySelector('#addResultForm').closest('.admin-card');
+  card.style.animation = 'pulse-blue 1s ease';
+  setTimeout(() => card.style.animation = '', 1000);
+  showToast('Fikstür bilgileri forma kopyalandı.');
+};
+
+window.updateFixtureDate = function (fid, newDate) {
   const fixtures = DB.fixtures;
   const f = fixtures.find(x => x.id === fid);
   if (f) { f.date = newDate; DB.saveFixtures(fixtures); renderAll(); showToast('📅 Tarih güncellendi.'); }
 };
 
-window.updateFixtureTime = function(fid, newTime) {
+window.updateFixtureTime = function (fid, newTime) {
   const fixtures = DB.fixtures;
   const f = fixtures.find(x => x.id === fid);
   if (f) { f.time = newTime; DB.saveFixtures(fixtures); renderAll(); showToast('🕐 Saat güncellendi.'); }
 };
 
-window.deleteFixture = function(fid) {
+window.deleteFixture = function (fid) {
   if (!confirm('Bu fikstürü silmek istediğinizden emin misiniz?')) return;
   DB.saveFixtures(DB.fixtures.filter(f => f.id !== fid));
   renderAll(); showToast('Fikstür silindi.');
@@ -652,21 +716,22 @@ function renderAll() {
   renderAdminTeamsList();
   populateWeekFilter();
   renderFixtureMgmt();
+  renderMatchMgmt();
 }
 
 // ── ADMIN PASSWORD GATE ───────────────────
 // Level 1 (fixture only) — default: '1234'
 // Level 2 (full admin)   — default: '4321'
 // Level 3 (danger zone)  — default: '9999'
-const ADMIN_PW_KEY  = 'fl_admin_pw';   // fixture password
-const FULL_PW_KEY   = 'fl_full_pw';    // full admin password
+const ADMIN_PW_KEY = 'fl_admin_pw';   // fixture password
+const FULL_PW_KEY = 'fl_full_pw';    // full admin password
 const DANGER_PW_KEY = 'fl_danger_pw';  // danger password
-function getAdminPw()  { return localStorage.getItem(ADMIN_PW_KEY)  || '1234'; }
-function getFullPw()   { return localStorage.getItem(FULL_PW_KEY)   || '1706'; }
+function getAdminPw() { return localStorage.getItem(ADMIN_PW_KEY) || '1234'; }
+function getFullPw() { return localStorage.getItem(FULL_PW_KEY) || '1706'; }
 function getDangerPw() { return localStorage.getItem(DANGER_PW_KEY) || '3669'; }
 
 let fixtureUnlocked = false; // 1. şifre: sadece fikstür
-let adminUnlocked   = false; // 2. şifre: tam yönetim
+let adminUnlocked = false; // 2. şifre: tam yönetim
 
 // Show/hide admin cards based on current unlock level
 function applyAdminView() {
@@ -681,9 +746,9 @@ function applyAdminView() {
 // openGate with a single expected pw, calls onSuccess on match
 function openGate(expectedPw, onSuccess, title = 'Yönetim Paneli', desc = 'Bu alana erişmek için şifre gereklidir.') {
   const overlay = document.getElementById('gateOverlay');
-  const input   = document.getElementById('gateInput');
+  const input = document.getElementById('gateInput');
   overlay.querySelector('.gate-title').textContent = title;
-  overlay.querySelector('.gate-desc').textContent  = desc;
+  overlay.querySelector('.gate-desc').textContent = desc;
   input.value = '';
   input.classList.remove('error');
   overlay.classList.add('open');
@@ -701,8 +766,8 @@ function openGate(expectedPw, onSuccess, title = 'Yönetim Paneli', desc = 'Bu a
       input.focus();
     }
   };
-  const cancel  = () => { overlay.classList.remove('open'); cleanup(); };
-  const onKey   = e => { if (e.key === 'Enter') tryLogin(); if (e.key === 'Escape') cancel(); };
+  const cancel = () => { overlay.classList.remove('open'); cleanup(); };
+  const onKey = e => { if (e.key === 'Enter') tryLogin(); if (e.key === 'Escape') cancel(); };
   const cleanup = () => {
     document.getElementById('gateSubmit').removeEventListener('click', tryLogin);
     input.removeEventListener('keydown', onKey);
@@ -717,9 +782,9 @@ function openGate(expectedPw, onSuccess, title = 'Yönetim Paneli', desc = 'Bu a
 // Admin tab gate: accepts EITHER password, unlocks appropriate level
 function openAdminGate() {
   const overlay = document.getElementById('gateOverlay');
-  const input   = document.getElementById('gateInput');
+  const input = document.getElementById('gateInput');
   overlay.querySelector('.gate-title').textContent = 'Yönetim Paneli';
-  overlay.querySelector('.gate-desc').textContent  = 'Fikstür şifresi veya tam yönetim şifresiyle giriş yapın.';
+  overlay.querySelector('.gate-desc').textContent = 'Fikstür şifresi veya tam yönetim şifresiyle giriş yapın.';
   input.value = '';
   input.classList.remove('error');
   overlay.classList.add('open');
@@ -729,7 +794,7 @@ function openAdminGate() {
     const val = input.value;
     if (val === getFullPw()) {
       fixtureUnlocked = true;
-      adminUnlocked   = true;
+      adminUnlocked = true;
       overlay.classList.remove('open');
       cleanup();
       switchTab('admin');
@@ -747,8 +812,8 @@ function openAdminGate() {
       input.focus();
     }
   };
-  const cancel  = () => { overlay.classList.remove('open'); cleanup(); };
-  const onKey   = e => { if (e.key === 'Enter') tryLogin(); if (e.key === 'Escape') cancel(); };
+  const cancel = () => { overlay.classList.remove('open'); cleanup(); };
+  const onKey = e => { if (e.key === 'Enter') tryLogin(); if (e.key === 'Escape') cancel(); };
   const cleanup = () => {
     document.getElementById('gateSubmit').removeEventListener('click', tryLogin);
     input.removeEventListener('keydown', onKey);
@@ -794,17 +859,17 @@ function showToast(msg) {
 
 // ── MODAL ─────────────────────────────────
 function openMatchModal(resultId) {
-  const r       = DB.results.find(x => x.id === resultId);
+  const r = DB.results.find(x => x.id === resultId);
   if (!r) return;
-  const teams   = DB.teams, players = DB.players;
-  const findT   = id => teams.find(t => t.id === id) || { name: '?', color: '#666' };
-  const findP   = id => players.find(p => p.id === id);
+  const teams = DB.teams, players = DB.players;
+  const findT = id => teams.find(t => t.id === id) || { name: '?', color: '#666' };
+  const findP = id => players.find(p => p.id === id);
   const h = findT(r.homeId), a = findT(r.awayId);
-  const date = r.date ? new Date(r.date + 'T00:00:00').toLocaleDateString('tr-TR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' }) : '';
+  const date = r.date ? new Date(r.date + 'T00:00:00').toLocaleDateString('tr-TR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) : '';
 
   // Lineups
-  const homeLineup = (r.homeLineup || []).map(pid => findP(pid)).filter(Boolean).sort((x,y)=>x.number-y.number);
-  const awayLineup = (r.awayLineup || []).map(pid => findP(pid)).filter(Boolean).sort((x,y)=>x.number-y.number);
+  const homeLineup = (r.homeLineup || []).map(pid => findP(pid)).filter(Boolean).sort((x, y) => x.number - y.number);
+  const awayLineup = (r.awayLineup || []).map(pid => findP(pid)).filter(Boolean).sort((x, y) => x.number - y.number);
 
   const playerRow = p => `
     <div class="modal-player-row">
@@ -829,29 +894,31 @@ function openMatchModal(resultId) {
     </div>` : '';
 
   // Events
-  const events = (r.events || []).slice().sort((x,y) => x.minute - y.minute);
+  const events = (r.events || []).slice().sort((x, y) => x.minute - y.minute);
   const eventsSection = events.length ? `
     <div class="modal-section">
       <div class="modal-section-title">Maç Olayları</div>
       <div class="modal-events">
         ${events.map(ev => {
-          const player  = findP(ev.playerId);
-          const assist  = ev.assistId ? findP(ev.assistId) : null;
-          const side    = ev.teamSide === 'home' ? h.color : a.color;
-          let icon = '⚽', cls = 'goal-pill';
-          if (ev.type === 'yellow') { icon = '🟨'; cls = 'yellow-pill'; }
-          if (ev.type === 'red')    { icon = '🟥'; cls = 'red-pill'; }
-          const assistTxt = assist && ev.type === 'goal' ? `<span style="opacity:.6;font-size:.8rem"> — Asist: ${assist.name}</span>` : '';
-          return `
+    const player = findP(ev.playerId);
+    const assist = ev.assistId ? findP(ev.assistId) : null;
+    const side = ev.teamSide === 'home' ? h.color : a.color;
+    let icon = '⚽', cls = 'goal-pill';
+    if (ev.type === 'yellow') { icon = '🟨'; cls = 'yellow-pill'; }
+    if (ev.type === 'red') { icon = '🟥'; cls = 'red-pill'; }
+    const assistTxt = assist && ev.type === 'goal' ? `<span style="opacity:.6;font-size:.8rem"> — Asist: ${assist.name}</span>` : '';
+    return `
           <div class="modal-event-row">
             <span style="color:${side};font-size:1rem">${icon}</span>
             <span style="font-weight:700;min-width:36px">${ev.minute}'</span>
             <span style="font-weight:600">${player?.name || '?'}</span>${assistTxt}
             <span class="ev-side">${ev.teamSide === 'home' ? h.name.split(' ')[0] : a.name.split(' ')[0]}</span>
           </div>`;
-        }).join('')}
+  }).join('')}
       </div>
     </div>` : '';
+
+  const deleteBtn = adminUnlocked ? `<div style="margin-top:24px"><button class="btn btn-danger" onclick="deleteResult('${r.id}')" style="width:100%; border-radius:8px; padding:12px; font-weight:700">🗑 Bu Maçı Sil</button></div>` : '';
 
   document.getElementById('modalContent').innerHTML = `
     <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em">${date} · Hafta ${r.week}</div>
@@ -873,7 +940,8 @@ function openMatchModal(resultId) {
       </div>
     </div>
     ${lineupSection}
-    ${eventsSection}`;
+    ${eventsSection}
+    ${deleteBtn}`;
 
   document.getElementById('modalOverlay').classList.add('open');
 }
@@ -883,19 +951,28 @@ function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
 }
 
+window.deleteResult = function (id) {
+  if (!confirm('Bu maç sonucunu kalıcı olarak silmek istediğinize emin misiniz?')) return;
+  const newResults = DB.results.filter(r => r.id !== id);
+  DB.saveResults(newResults);
+  closeModal();
+  renderAll();
+  showToast('🗑 Maç sonucu silindi.');
+};
+
 // ── LINEUP SELECTS ────────────────────────
 function updateLineupSelects() {
   const homeId = document.getElementById('homeTeam').value;
   const awayId = document.getElementById('awayTeam').value;
   const players = DB.players;
-  const teams   = DB.teams;
+  const teams = DB.teams;
 
   const buildLineup = (teamId, containerId, titleId, teamName) => {
     const container = document.getElementById(containerId);
-    const title     = document.getElementById(titleId);
+    const title = document.getElementById(titleId);
     if (title) title.textContent = teamName ? `${teamName} — İlk 11` : 'Ev Sahibi İlk 11';
     if (!teamId) { container.innerHTML = '<span style="font-size:.8rem;color:var(--text-muted)">Önce takım seçin.</span>'; return; }
-    const tp = players.filter(p => p.teamId === teamId).sort((a,b)=>a.number-b.number);
+    const tp = players.filter(p => p.teamId === teamId).sort((a, b) => a.number - b.number);
     if (!tp.length) { container.innerHTML = '<span style="font-size:.8rem;color:var(--text-muted)">Bu takıma oyuncu eklenmemiş.</span>'; return; }
     container.innerHTML = tp.map(p => `
       <label class="lineup-check" id="lc-${containerId}-${p.id}">
@@ -914,26 +991,26 @@ function updateLineupSelects() {
   updateEventPlayerSelect();
 }
 
-window.toggleLineupCheck = function(cb) {
+window.toggleLineupCheck = function (cb) {
   const label = cb.closest('.lineup-check');
   label.classList.toggle('checked', cb.checked);
   // Validate max 11
-  const side  = cb.dataset.side;
-  const all   = document.querySelectorAll(`.lineup-cb[data-side="${side}"]`);
+  const side = cb.dataset.side;
+  const all = document.querySelectorAll(`.lineup-cb[data-side="${side}"]`);
   const checked = [...all].filter(x => x.checked);
   if (checked.length > 11) { cb.checked = false; label.classList.remove('checked'); showToast('En fazla 11 oyuncu seçebilirsiniz!'); }
 };
 
 // ── EVENT PLAYER SELECT ───────────────────
 function updateEventPlayerSelect() {
-  const side   = document.getElementById('eventTeamSide').value;
+  const side = document.getElementById('eventTeamSide').value;
   const homeId = document.getElementById('homeTeam').value;
   const awayId = document.getElementById('awayTeam').value;
   const teamId = side === 'home' ? homeId : awayId;
-  const players = DB.players.filter(p => p.teamId === teamId).sort((a,b)=>a.number-b.number);
-  const opts   = players.map(p => `<option value="${p.id}">[${p.number}] ${p.name}</option>`).join('');
-  const blank  = `<option value="">Oyuncu Seçin</option>`;
-  document.getElementById('eventPlayer').innerHTML  = blank + opts;
+  const players = DB.players.filter(p => p.teamId === teamId).sort((a, b) => a.number - b.number);
+  const opts = players.map(p => `<option value="${p.id}">[${p.number}] ${p.name}</option>`).join('');
+  const blank = `<option value="">Oyuncu Seçin</option>`;
+  document.getElementById('eventPlayer').innerHTML = blank + opts;
   const assistBlank = `<option value="">Asist Yok</option>`;
   document.getElementById('eventAssist').innerHTML = assistBlank + opts;
 }
@@ -950,7 +1027,7 @@ function renderPendingEvents() {
     const assist = ev.assistId ? players.find(p => p.id === ev.assistId) : null;
     let icon = '⚽';
     if (ev.type === 'yellow') icon = '🟨';
-    if (ev.type === 'red')    icon = '🟥';
+    if (ev.type === 'red') icon = '🟥';
     const assistTxt = assist ? ` (${assist.name})` : '';
     const side = ev.teamSide === 'home'
       ? (DB.teams.find(t => t.id === document.getElementById('homeTeam').value)?.name || 'Ev')
@@ -965,16 +1042,18 @@ function renderPendingEvents() {
     </div>`;
   }).join('');
 }
-window.removeEvent = function(i) { pendingEvents.splice(i, 1); renderPendingEvents(); };
+window.removeEvent = function (i) { pendingEvents.splice(i, 1); renderPendingEvents(); };
 
 // ── CRUD ──────────────────────────────────
 function deleteTeam(id) {
-  if (!confirm('Bu takımı silmek istediğinizden emin misiniz?')) return;
-  DB.saveTeams(DB.teams.filter(t => t.id !== id));
-  DB.savePlayers(DB.players.filter(p => p.teamId !== id));
-  DB.saveResults(DB.results.filter(r => r.homeId !== id && r.awayId !== id));
-  DB.saveFixtures(DB.fixtures.filter(f => f.homeId !== id && f.awayId !== id));
-  renderAll(); showToast('Takım silindi.');
+  if (!confirm('Bu takımı ve ona bağlı tüm oyuncu/maçları silmek istediğinizden emin misiniz?')) return;
+  const newTeams = DB.teams.filter(t => t.id !== id);
+  const newPlayers = DB.players.filter(p => p.teamId !== id);
+  const newResults = DB.results.filter(r => r.homeId !== id && r.awayId !== id);
+  const newFixtures = DB.fixtures.filter(f => f.homeId !== id && f.awayId !== id);
+  DB.saveAll(newTeams, newPlayers, newResults, newFixtures);
+  renderAll();
+  showToast('Takım ve bağlı veriler silindi.');
 }
 window.deleteTeam = deleteTeam;
 
@@ -1000,7 +1079,7 @@ function initForms() {
   // Add team
   document.getElementById('addTeamForm').addEventListener('submit', e => {
     e.preventDefault();
-    const name  = document.getElementById('teamName').value.trim();
+    const name = document.getElementById('teamName').value.trim();
     const color = document.getElementById('teamColor').value;
     if (!name) return;
     if (DB.teams.find(t => t.name.toLowerCase() === name.toLowerCase())) { showToast('Bu isimde takım zaten var!'); return; }
@@ -1014,9 +1093,9 @@ function initForms() {
   // Add player
   document.getElementById('addPlayerForm').addEventListener('submit', e => {
     e.preventDefault();
-    const teamId   = document.getElementById('playerTeam').value;
-    const number   = parseInt(document.getElementById('playerNumber').value);
-    const name     = document.getElementById('playerName').value.trim();
+    const teamId = document.getElementById('playerTeam').value;
+    const number = parseInt(document.getElementById('playerNumber').value);
+    const name = document.getElementById('playerName').value.trim();
     const position = document.getElementById('playerPos').value;
     if (!teamId || !name || !position) { showToast('Tüm alanları doldurun!'); return; }
     const players = DB.players;
@@ -1041,48 +1120,58 @@ function initForms() {
 
   // Add event
   document.getElementById('addEventBtn').addEventListener('click', () => {
-    const type     = document.getElementById('eventType').value;
-    const minute   = parseInt(document.getElementById('eventMinute').value);
+    const type = document.getElementById('eventType').value;
+    const minute = parseInt(document.getElementById('eventMinute').value);
     const teamSide = document.getElementById('eventTeamSide').value;
     const playerId = document.getElementById('eventPlayer').value;
     const assistId = type === 'goal' ? (document.getElementById('eventAssist').value || null) : null;
     if (!playerId || isNaN(minute)) { showToast('Olay için oyuncu ve dakika gerekli!'); return; }
     pendingEvents.push({ type, minute, teamSide, playerId, assistId });
-    pendingEvents.sort((a,b) => a.minute - b.minute);
+    pendingEvents.sort((a, b) => a.minute - b.minute);
     document.getElementById('eventMinute').value = '';
     renderPendingEvents();
   });
 
-  // Add result
   document.getElementById('addResultForm').addEventListener('submit', e => {
     e.preventDefault();
-    const homeId    = document.getElementById('homeTeam').value;
-    const awayId    = document.getElementById('awayTeam').value;
-    const homeScore = parseInt(document.getElementById('homeScore').value);
-    const awayScore = parseInt(document.getElementById('awayScore').value);
-    const week      = parseInt(document.getElementById('matchWeek').value);
-    const date      = document.getElementById('matchDate').value;
-    if (!homeId || !awayId) { showToast('Takımları seçin!'); return; }
-    if (homeId === awayId)  { showToast('Aynı takımı seçemezsiniz!'); return; }
+    try {
+      const homeId = document.getElementById('homeTeam').value;
+      const awayId = document.getElementById('awayTeam').value;
+      const homeScore = parseInt(document.getElementById('homeScore').value);
+      const awayScore = parseInt(document.getElementById('awayScore').value);
+      const week = parseInt(document.getElementById('matchWeek').value);
+      const date = document.getElementById('matchDate').value;
+      if (!homeId || !awayId) { showToast('Takımları seçin!'); return; }
+      if (homeId === awayId) { showToast('Aynı takımı seçemezsiniz!'); return; }
+      if (isNaN(homeScore) || isNaN(awayScore)) { showToast('Geçerli bir skor girin!'); return; }
+      if (isNaN(week) || week < 1) { showToast('Geçerli bir hafta numarası girin!'); return; }
+      if (!date) { showToast('Tarih seçin!'); return; }
 
-    // Collect lineups
-    const homeLineup = [...document.querySelectorAll('.lineup-cb[data-side="homeLineupSelect"]:checked')].map(cb => cb.dataset.pid);
-    const awayLineup = [...document.querySelectorAll('.lineup-cb[data-side="awayLineupSelect"]:checked')].map(cb => cb.dataset.pid);
+      // Collect lineups
+      const homeLineup = [...document.querySelectorAll('.lineup-cb[data-side="homeLineupSelect"]:checked')].map(cb => cb.dataset.pid);
+      const awayLineup = [...document.querySelectorAll('.lineup-cb[data-side="awayLineupSelect"]:checked')].map(cb => cb.dataset.pid);
 
-    const results = DB.results;
-    results.push({ id: Date.now().toString(), homeId, awayId, homeScore, awayScore, week, date, homeLineup, awayLineup, events: [...pendingEvents] });
-    DB.saveResults(results);
-    pendingEvents = [];
-    e.target.reset();
-    document.getElementById('matchWeek').value = week;
-    document.getElementById('homeLineupSelect').innerHTML = '';
-    document.getElementById('awayLineupSelect').innerHTML = '';
-    document.getElementById('eventsList').innerHTML = '';
-    renderAll();
-    const teams = DB.teams;
-    const hn = teams.find(t => t.id === homeId)?.name || '';
-    const an = teams.find(t => t.id === awayId)?.name || '';
-    showToast(`✅ ${hn} ${homeScore}–${awayScore} ${an} kaydedildi!`);
+      const resultObj = { id: Date.now().toString(), homeId, awayId, homeScore, awayScore, week, date, homeLineup, awayLineup };
+      if (pendingEvents.length) resultObj.events = [...pendingEvents];
+      
+      const results = DB.results;
+      results.push(resultObj);
+      DB.saveResults(results);
+      pendingEvents = [];
+      e.target.reset();
+      document.getElementById('matchWeek').value = week;
+      document.getElementById('homeLineupSelect').innerHTML = '';
+      document.getElementById('awayLineupSelect').innerHTML = '';
+      document.getElementById('eventsList').innerHTML = '';
+      renderAll();
+      const teams = DB.teams;
+      const hn = teams.find(t => t.id === homeId)?.name || '';
+      const an = teams.find(t => t.id === awayId)?.name || '';
+      showToast(`✅ ${hn} ${homeScore}–${awayScore} ${an} kaydedildi!`);
+    } catch (err) {
+      alert("Form Hatası: " + err.message);
+      console.error(err);
+    }
   });
 
   // Add fixture
@@ -1090,12 +1179,12 @@ function initForms() {
     e.preventDefault();
     const homeId = document.getElementById('fixtureHome').value;
     const awayId = document.getElementById('fixtureAway').value;
-    const week   = parseInt(document.getElementById('fixtureWeek').value);
-    const date   = document.getElementById('fixtureDate').value;
-    const time   = document.getElementById('fixtureTime').value;
-    const venue  = document.getElementById('fixtureVenue').value.trim();
+    const week = parseInt(document.getElementById('fixtureWeek').value);
+    const date = document.getElementById('fixtureDate').value;
+    const time = document.getElementById('fixtureTime').value;
+    const venue = document.getElementById('fixtureVenue').value.trim();
     if (!homeId || !awayId) { showToast('Takımları seçin!'); return; }
-    if (homeId === awayId)  { showToast('Aynı takımı seçemezsiniz!'); return; }
+    if (homeId === awayId) { showToast('Aynı takımı seçemezsiniz!'); return; }
     const fixtures = DB.fixtures;
     fixtures.push({ id: Date.now().toString(), homeId, awayId, week, date, time, venue });
     DB.saveFixtures(fixtures);
@@ -1121,8 +1210,9 @@ function initForms() {
     openGate(
       getDangerPw(),
       () => {
-        ['fl_teams','fl_players','fl_results','fl_fixtures'].forEach(k => localStorage.removeItem(k));
-        renderAll(); showToast('Tüm veriler sıfırlandı.');
+        DB.saveAll([], [], [], []);
+        renderAll();
+        showToast('Tüm veriler sıfırlandı.');
       },
       '⚠️ Tehlikeli Bölge',
       'Tüm takımlar, oyuncular ve maçlar silinecek. Bu işlem geri alınamaz!'
@@ -1148,14 +1238,14 @@ function initForms() {
 
   document.getElementById('saveDrawBtn').addEventListener('click', () => {
     if (!drawnPairs.length) { showToast('Önce kura çekin!'); return; }
-    const week  = parseInt(document.getElementById('drawWeek').value) || 1;
-    const date  = document.getElementById('drawDate').value || '';
-    const time  = document.getElementById('drawTime').value || '14:00';
+    const week = parseInt(document.getElementById('drawWeek').value) || 1;
+    const date = document.getElementById('drawDate').value || '';
+    const time = document.getElementById('drawTime').value || '14:00';
     const fixtures = DB.fixtures;
     drawnPairs.forEach(pair => {
       if (!pair.bye) {
         fixtures.push({
-          id: Date.now().toString() + Math.random().toString(36).slice(2,6),
+          id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
           homeId: pair.home.id,
           awayId: pair.away.id,
           week, date, time, venue: ''
@@ -1172,10 +1262,10 @@ function initForms() {
   });
 
   function startDraw(teams) {
-    const poolEl    = document.getElementById('drawPool');
+    const poolEl = document.getElementById('drawPool');
     const resultsEl = document.getElementById('drawResults');
     const actionsEl = document.getElementById('drawActions');
-    const drawBtn   = document.getElementById('startDrawBtn');
+    const drawBtn = document.getElementById('startDrawBtn');
 
     resultsEl.innerHTML = '';
     actionsEl.style.display = 'none';
@@ -1216,7 +1306,7 @@ function initForms() {
 
     // Animate pair reveals
     const revealDelay = 1200; // ms between each pair
-    const startDelay  = 1500; // initial shuffle time
+    const startDelay = 1500; // initial shuffle time
 
     pairs.forEach((pair, idx) => {
       setTimeout(() => {
@@ -1279,18 +1369,31 @@ function initModal() {
 // ── FIREBASE INIT & SEED ───────────────────
 function initFirebase() {
   firebase.initializeApp(FIREBASE_CONFIG);
+
+  // Anonymous sign-in to satisfy security rules and stop "insecure" emails:
+  firebase.auth().signInAnonymously()
+    .then(() => console.log("Firebase: Anonim giriş başarılı."))
+    .catch(err => console.error("Firebase Auth hatası:", err));
+
   let firstLoad = true;
 
   firebase.database().ref('/').on('value', snap => {
     const v = snap.val() || {};
-    CACHE.teams    = v.fl_teams    ? Object.values(v.fl_teams)    : [];
-    CACHE.players  = v.fl_players  ? Object.values(v.fl_players)  : [];
-    CACHE.results  = v.fl_results  ? Object.values(v.fl_results)  : [];
-    CACHE.fixtures = v.fl_fixtures ? Object.values(v.fl_fixtures) : [];
+    CACHE.teams = v.fl_teams ? Object.values(v.fl_teams).filter(t => t && t.id && t.name) : [];
+    CACHE.players = v.fl_players ? Object.values(v.fl_players).filter(p => p && p.id && p.name && p.teamId) : [];
+    CACHE.results = v.fl_results ? Object.values(v.fl_results).map(r => ({
+      ...r,
+      homeScore: r.homeScore !== undefined ? parseInt(r.homeScore) : 0,
+      awayScore: r.awayScore !== undefined ? parseInt(r.awayScore) : 0,
+      week: r.week !== undefined ? parseInt(r.week) : 1
+    })).filter(r => 
+      r && r.id && r.homeId && r.awayId && 
+      !isNaN(r.homeScore) && !isNaN(r.awayScore) && !isNaN(r.week)
+    ) : [];
+    CACHE.fixtures = v.fl_fixtures ? Object.values(v.fl_fixtures).filter(f => f && f.id && f.homeId && f.awayId) : [];
 
     if (firstLoad) {
       firstLoad = false;
-      if (!CACHE.teams.length) seedFirebase();
       const overlay = document.getElementById('loadingOverlay');
       if (overlay) overlay.style.display = 'none';
     }
@@ -1299,20 +1402,22 @@ function initFirebase() {
   });
 }
 
+// Removed cleanCorruptRecords explicitly to avoid deleting users data
+
 function seedFirebase() {
   const teams = [
-    { id:'t1',  name:'9A',  color:'#4f7cff' },
-    { id:'t2',  name:'9B',  color:'#f5c542' },
-    { id:'t3',  name:'9C',  color:'#22c55e' },
-    { id:'t4',  name:'9D',  color:'#ef4444' },
-    { id:'t5',  name:'10A', color:'#a855f7' },
-    { id:'t6',  name:'10B', color:'#f97316' },
-    { id:'t7',  name:'10C', color:'#06b6d4' },
-    { id:'t8',  name:'10D', color:'#ec4899' },
-    { id:'t9',  name:'11A', color:'#84cc16' },
-    { id:'t10', name:'11B', color:'#f59e0b' },
-    { id:'t11', name:'11C', color:'#14b8a6' },
-    { id:'t12', name:'11D', color:'#6366f1' },
+    { id: 't1', name: '9A', color: '#4f7cff' },
+    { id: 't2', name: '9B', color: '#f5c542' },
+    { id: 't3', name: '9C', color: '#22c55e' },
+    { id: 't4', name: '9D', color: '#ef4444' },
+    { id: 't5', name: '10A', color: '#a855f7' },
+    { id: 't6', name: '10B', color: '#f97316' },
+    { id: 't7', name: '10C', color: '#06b6d4' },
+    { id: 't8', name: '10D', color: '#ec4899' },
+    { id: 't9', name: '11A', color: '#84cc16' },
+    { id: 't10', name: '11B', color: '#f59e0b' },
+    { id: 't11', name: '11C', color: '#14b8a6' },
+    { id: 't12', name: '11D', color: '#6366f1' },
   ];
   DB.saveTeams(teams);
 }
